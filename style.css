@@ -1,32 +1,28 @@
+/* =========================================================================
+   VARIABLES DE COLOR Y TIPOGRAFÍA
+   Tocá estos valores para cambiar el aspecto general de toda la página.
+   ========================================================================= */
 :root {
-  --paper: #ffffff;
-  --paper-raised: #ffffff;
-  --ink: #b200ff;
-  --ink-soft: #4A564E;
-  --teal: #b200ff;
-  --teal-dark: #000000;
-  --sage: #000000;
-  --rust: #000000;
-  --slate: #b200ff;
-  --line-strong: #b200ff;
-  --danger: #A6402E;
+  /* Paleta pedida: blanco, negro y violeta (b200ff) */
+  --paper: #ffffff;        /* fondo general */
+  --paper-raised: #ffffff; /* fondo de tarjetas / modal */
+  --ink: #000000;          /* texto principal */
+  --ink-soft: #4d4d4d;     /* texto secundario (gris, variante de negro) */
+  --accent: #b200ff;       /* violeta: botones, bordes activos, hover */
+  --line: #e6e6e6;         /* líneas finas (gris muy claro, entre blanco y negro) */
+  --line-strong: #cccccc;  /* bordes de inputs/chips */
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-display: 'Space Grotesk', sans-serif; /* títulos */
+  --font-body: 'Inter', sans-serif;            /* texto general */
+  --font-mono: 'IBM Plex Mono', monospace;     /* datos: precio, código, etc. */
 }
 
 * { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
   background-color: var(--paper);
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 27px, var(--line) 27px, var(--line) 28px),
-    repeating-linear-gradient(90deg, transparent, transparent 27px, var(--line) 27px, var(--line) 28px);
-  background-size: 28px 28px;
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -34,8 +30,7 @@ body {
 }
 
 .mono { font-family: var(--font-mono); }
-
-a { color: var(--teal-dark); }
+a { color: var(--accent); }
 
 /* ---------- Header ---------- */
 
@@ -50,134 +45,60 @@ a { color: var(--teal-dark); }
 .header-inner {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 22px 28px 16px;
+  padding: 30px 28px 18px;
+  /* Centrado pedido en el punto 4 */
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.brand-mark {
-  font-family: var(--font-display);
-  font-size: 30px;
-  line-height: 1;
-  color: var(--teal);
-  border: 2px solid var(--teal);
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  text-align: center;
 }
 
-.brand-text h1 {
+.brand-text, .brand { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.brand h1 {
   font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 600;
-  margin: 0 0 4px;
+  font-size: 34px;          /* más grande, punto 4 */
+  font-weight: 700;
+  margin: 0;
   letter-spacing: -0.01em;
 }
 
 .brand-sub {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;           /* más grande, punto 4 */
   color: var(--ink-soft);
 }
 
-.header-meta {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-
-.meta-block {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.meta-label {
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-}
-
-.meta-value {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.refresh-btn {
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--paper-raised);
-  background: var(--teal);
-  border: none;
-  border-radius: 3px;
-  padding: 10px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  transition: background-color 0.15s ease;
-}
-
-.refresh-btn:hover { background: var(--teal-dark); }
-.refresh-btn:focus-visible,
-input:focus-visible,
-.chip:focus-visible {
-  outline: 2px solid var(--slate);
-  outline-offset: 2px;
-}
-
-.refresh-icon {
-  display: inline-block;
-  transition: transform 0.5s ease;
-}
-.refresh-btn.spinning .refresh-icon {
-  animation: spin 0.7s linear;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ---------- Buscador + categorías ----------
+   filter-row ahora es una columna: el buscador arriba, los chips de
+   categoría debajo, en su propia fila. Los chips ya vienen con
+   flex-wrap, así que si no entran todos en un renglón bajan solos. */
 
 .filter-row {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 28px 18px;
+  padding: 0 28px 20px;
   display: flex;
+  flex-direction: column;
   gap: 14px;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
 #search-input {
   font-family: var(--font-body);
   font-size: 14px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   border: 1.5px solid var(--line-strong);
   border-radius: 3px;
   background: var(--paper);
-  min-width: 240px;
-  flex: 1 1 240px;
   color: var(--ink);
+  width: 100%;
 }
 #search-input::placeholder { color: var(--ink-soft); }
+#search-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .category-chips {
   display: flex;
+  flex-wrap: wrap;   /* clave del punto 2: acumula chips y salta de renglón */
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .chip {
@@ -191,33 +112,33 @@ input:focus-visible,
   color: var(--ink-soft);
   transition: all 0.15s ease;
 }
-.chip:hover { border-color: var(--teal); color: var(--teal); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.active {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper-raised);
 }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ---------- Status / errors ---------- */
+/* ---------- Banner de estado (avisos y errores de carga) ---------- */
 
 .status-banner {
   max-width: 1180px;
   margin: 20px auto 0;
   padding: 14px 18px;
-  border: 1.5px solid var(--danger);
+  border: 1.5px solid var(--ink);
   border-left-width: 5px;
-  background: #FBF0EC;
-  color: var(--danger);
+  background: #ffffff;
+  color: var(--ink);
   font-size: 14px;
   border-radius: 2px;
 }
 .status-banner.info {
-  border-color: var(--slate);
-  background: #EEF2F5;
-  color: var(--slate);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-/* ---------- Grid & cards ---------- */
+/* ---------- Grilla y tarjetas ---------- */
 
 #main-content {
   max-width: 1180px;
@@ -239,20 +160,24 @@ input:focus-visible,
   display: flex;
   flex-direction: column;
   position: relative;
+  cursor: pointer;         /* la tarjeta entera es clickeable (punto 7.2) */
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .product-card:hover {
   transform: translateY(-3px);
   box-shadow: 4px 6px 0 var(--line-strong);
 }
-
-.card-strip {
-  height: 6px;
-  width: 100%;
-  background: var(--teal);
+.product-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.card-ref {
+/* Franja de color de categoría. Los colores salen de CATEGORY_COLORS en
+   script.js — ahí es donde se edita la paleta, no acá. */
+.card-strip { height: 6px; width: 100%; }
+
+/* Código del producto, esquina superior derecha */
+.card-code {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -275,11 +200,7 @@ input:focus-visible,
   overflow: hidden;
   border-bottom: 1.5px solid var(--line);
 }
-.card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.card-media img { width: 100%; height: 100%; object-fit: cover; }
 .card-media .no-image {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -292,89 +213,62 @@ input:focus-visible,
   padding: 16px 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
   flex: 1;
 }
 
-.card-category {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--teal-dark);
-}
-
+/* Orden pedido en 7.1: nombre, categoría, subcategoría, precio */
 .card-title {
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 4px;
   line-height: 1.25;
 }
-
-.card-desc {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 0;
-  flex: 1;
-}
-
-.spec-rows {
-  border-top: 1px dashed var(--line-strong);
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.spec-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 12.5px;
-  gap: 10px;
-}
-
-.spec-row .k {
+.card-category {
   font-family: var(--font-mono);
-  color: var(--ink-soft);
-  text-transform: uppercase;
   font-size: 10.5px;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
 }
-
-.spec-row .v {
+.card-subcategory {
   font-family: var(--font-mono);
-  text-align: right;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  opacity: 0.8;
 }
 
 .card-footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 4px;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1.5px solid var(--ink);
+  flex-wrap: wrap;
 }
 
 .card-price {
   font-family: var(--font-display);
   font-size: 21px;
   font-weight: 700;
-  color: var(--rust);
+  color: var(--ink);
 }
-
-.stock-tag {
+.card-currency {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.iva-tag {
   font-family: var(--font-mono);
   font-size: 10.5px;
-  text-transform: uppercase;
-  padding: 3px 8px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 2px;
-  letter-spacing: 0.04em;
+  padding: 1px 6px;
 }
-.stock-tag.in { background: #EAF1E4; color: var(--teal-dark); }
-.stock-tag.out { background: #F6E7E2; color: var(--danger); }
 
 .empty-state {
   text-align: center;
@@ -394,35 +288,132 @@ input:focus-visible,
   font-size: 12px;
 }
 
-/* ---------- Skeleton loading ---------- */
+/* ---------- Modal de detalle (punto 7.2) ---------- */
 
-.skeleton {
-  background: linear-gradient(90deg, var(--line) 25%, #EDEEE7 37%, var(--line) 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
-  border-radius: 3px;
-}
-@keyframes shimmer {
-  0% { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
 }
 
-/* ---------- Responsive ---------- */
+.modal-content {
+  background: var(--paper-raised);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-raised);
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  z-index: 3;
+}
+.modal-close:hover { background: var(--ink); color: var(--paper-raised); }
+
+.modal-media {
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 260px;
+}
+.modal-media img { width: 100%; height: 100%; object-fit: cover; }
+
+.modal-info {
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-info h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin: 0 0 2px;
+}
+.modal-category, .modal-subcategory {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.modal-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 12px 0;
+  padding-top: 12px;
+  border-top: 1.5px solid var(--ink);
+  flex-wrap: wrap;
+}
+.modal-price {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+}
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 8px;
+}
+.modal-row .k {
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+.modal-desc {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+/* En mobile el modal pasa a una sola columna (imagen arriba, datos abajo) */
+@media (max-width: 640px) {
+  .modal-content { grid-template-columns: 1fr; }
+  .modal-media { min-height: 200px; }
+}
+
+/* ---------- Responsive general ---------- */
 
 @media (max-width: 560px) {
-  .header-inner { padding: 18px 18px 14px; }
+  .header-inner { padding: 24px 18px 14px; }
   .filter-row { padding: 0 18px 16px; }
   #main-content { padding: 20px 18px 50px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .brand-text h1 { font-size: 21px; }
-  .header-meta { gap: 14px; }
+  .brand h1 { font-size: 26px; }
 }
 
 @media (max-width: 380px) {
   .catalog-grid { grid-template-columns: 1fr; }
 }
 
-/* ---------- Reduced motion ---------- */
+/* ---------- Accesibilidad: respeta "reducir movimiento" del sistema ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
