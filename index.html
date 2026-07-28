@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo — Laboratorio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">⊕</span>
+      <div class="brand-text">
+        <h1 id="lab-name">Catálogo de Productos</h1>
+        <p class="brand-sub" id="lab-sub">Actualizado desde planilla — precios verificados en origen</p>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="meta-block">
+        <span class="meta-label">Última actualización</span>
+        <span class="meta-value mono" id="last-updated">—</span>
+      </div>
+      <div class="meta-block">
+        <span class="meta-label">Productos</span>
+        <span class="meta-value mono" id="product-count">0</span>
+      </div>
+      <button id="refresh-btn" class="refresh-btn" title="Actualizar ahora">
+        <span class="refresh-icon" aria-hidden="true">↻</span> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <input type="text" id="search-input" placeholder="Buscar producto, código o categoría…" autocomplete="off">
+    <div id="category-chips" class="category-chips"></div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div id="status-banner" class="status-banner" hidden></div>
+  <div id="catalog-grid" class="catalog-grid"></div>
+  <div id="empty-state" class="empty-state" hidden>
+    <p>No hay productos que coincidan con la búsqueda.</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>Este catálogo se lee en vivo desde una planilla de Google Sheets. Los cambios de precio o stock que hagas ahí se reflejan acá automáticamente.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
