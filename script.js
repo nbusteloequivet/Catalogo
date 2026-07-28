@@ -1,16 +1,12 @@
-/* =========================================================================
-   CONFIGURACIÓN — Lo único que tenés que editar vos.
-   Ver README.md para el paso a paso de cómo obtener la URL del CSV.
-   ========================================================================= */
 const CONFIG = {
   SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQC4BFXcTT1kYiQALcRtU2X4EkKqAbXc1tf0hfLzsaZbofK_AaDVn6X6Nj9Vlx-6ld484FGk1VHG1Y2/pub?gid=0&single=true&output=csv",
 
   // Nombre y bajada que se muestran en el encabezado
   LAB_NAME: "EquiVet",
-  LAB_SUBTITLE: "que pasó, te asustaste?",
+  LAB_SUBTITLE: "SLOGAN",
 
   // Cada cuánto se vuelve a consultar la planilla automáticamente (ms)
-  AUTO_REFRESH_MS: 60000,
+  AUTO_REFRESH_MS: 30000,
 
   // Ancho de imagen solicitado a Drive (afecta performance de carga)
   IMAGE_WIDTH: 500,
