@@ -294,11 +294,17 @@ a { color: var(--accent); }
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   z-index: 100;
+  display: none; /* oculto por defecto */
+}
+/* Solo se muestra cuando JS le saca el atributo "hidden" (al abrir un producto).
+   Sin esta línea, "display: flex" de arriba pisaba el "hidden" y el modal
+   quedaba siempre visible (esa era la línea negra fija que veías). */
+.modal-overlay:not([hidden]) {
+  display: flex;
 }
 
 .modal-content {
