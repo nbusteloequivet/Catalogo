@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
   els.grid = document.getElementById("catalog-grid");
   els.statusBanner = document.getElementById("status-banner");
   els.emptyState = document.getElementById("empty-state");
-  els.lastUpdated = null;
-  els.productCount = null;
-  els.refreshBtn = null;
+  els.lastUpdated = document.getElementById("last-updated");
+  els.productCount = document.getElementById("product-count");
+  els.refreshBtn = document.getElementById("refresh-btn");
   els.searchInput = document.getElementById("search-input");
   els.categoryChips = document.getElementById("category-chips");
   els.labName = document.getElementById("lab-name");
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   els.labName.textContent = CONFIG.LAB_NAME;
   els.labSub.textContent = CONFIG.LAB_SUBTITLE;
 
-  
+  els.refreshBtn.addEventListener("click", () => loadCatalog(true));
   els.searchInput.addEventListener("input", (e) => {
     searchTerm = e.target.value.trim().toLowerCase();
     renderGrid();
@@ -63,6 +63,8 @@ function loadCatalog(isManualOrAuto) {
     finishLoad();
     return;
   }
+
+  if (isManualOrAuto) els.refreshBtn.classList.add("spinning");
 
   // "cache bust" para que el navegador no devuelva una copia vieja del CSV
   const url = CONFIG.SHEET_CSV_URL + (CONFIG.SHEET_CSV_URL.includes("?") ? "&" : "?") + "_=" + Date.now();
@@ -96,6 +98,8 @@ function loadCatalog(isManualOrAuto) {
 function finishLoad() {
   buildCategoryChips();
   renderGrid();
+  els.lastUpdated.textContent = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  els.refreshBtn.classList.remove("spinning");
 }
 
 /* ------------------------------------------------------------------------
@@ -203,6 +207,7 @@ function renderGrid() {
     return true;
   });
 
+  els.productCount.textContent = allProducts.length;
   els.grid.innerHTML = "";
 
   if (filtered.length === 0) {
