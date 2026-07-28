@@ -13,31 +13,17 @@
 
 <header class="site-header">
   <div class="header-inner">
+    <!-- Nombre y bajada del laboratorio: se completan solos desde
+         CONFIG.LAB_NAME / CONFIG.LAB_SUBTITLE en script.js -->
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">⊕</span>
-      <div class="brand-text">
-        <h1 id="lab-name">Catálogo de Productos</h1>
-        <p class="brand-sub" id="lab-sub">Actualizado desde planilla — precios verificados en origen</p>
-      </div>
-    </div>
-
-    <div class="header-meta">
-      <div class="meta-block">
-        <span class="meta-label">Última actualización</span>
-        <span class="meta-value mono" id="last-updated">—</span>
-      </div>
-      <div class="meta-block">
-        <span class="meta-label">Productos</span>
-        <span class="meta-value mono" id="product-count">0</span>
-      </div>
-      <button id="refresh-btn" class="refresh-btn" title="Actualizar ahora">
-        <span class="refresh-icon" aria-hidden="true">↻</span> Actualizar
-      </button>
+      <h1 id="lab-name">Catálogo de Productos</h1>
+      <p class="brand-sub" id="lab-sub">Actualizado desde planilla</p>
     </div>
   </div>
 
+  <!-- Buscador arriba, categorías debajo (se acumulan en filas si no entran) -->
   <div class="filter-row">
-    <input type="text" id="search-input" placeholder="Buscar producto, código o categoría…" autocomplete="off">
+    <input type="text" id="search-input" placeholder="Buscar producto, código, categoría o laboratorio…" autocomplete="off">
     <div id="category-chips" class="category-chips"></div>
   </div>
 </header>
@@ -51,8 +37,17 @@
 </main>
 
 <footer class="site-footer">
-  <p>Este catálogo se lee en vivo desde una planilla de Google Sheets. Los cambios de precio o stock que hagas ahí se reflejan acá automáticamente.</p>
+  <p>Este catálogo se lee en vivo desde una planilla de Google Sheets.</p>
 </footer>
+
+<!-- Modal de detalle: un solo bloque reutilizado para cualquier producto.
+     Arranca oculto (hidden) y script.js le carga el contenido al clickear una tarjeta. -->
+<div id="product-modal" class="modal-overlay" hidden>
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button id="modal-close" class="modal-close" aria-label="Cerrar">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="script.js"></script>
