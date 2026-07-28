@@ -1,15 +1,14 @@
 :root {
-  --paper: #F5F6F1;
-  --paper-raised: #FFFFFF;
-  --ink: #1C2620;
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --ink: #b200ff;
   --ink-soft: #4A564E;
-  --teal: #2F6F5E;
-  --teal-dark: #1E4A3F;
-  --sage: #7C8F5C;
-  --rust: #BE5F2C;
-  --slate: #46617A;
-  --line: #D9DCD1;
-  --line-strong: #B9BFAE;
+  --teal: #b200ff;
+  --teal-dark: #000000;
+  --sage: #000000;
+  --rust: #000000;
+  --slate: #b200ff;
+  --line-strong: #b200ff;
   --danger: #A6402E;
 
   --font-display: 'Space Grotesk', sans-serif;
