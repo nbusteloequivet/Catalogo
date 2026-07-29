@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo — Laboratorio</title>
+<title>Pedidos — Laboratorio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,15 +13,12 @@
 
 <header class="site-header">
   <div class="header-inner">
-    <!-- Nombre y bajada del laboratorio: se completan solos desde
-         CONFIG.LAB_NAME / CONFIG.LAB_SUBTITLE en script.js -->
     <div class="brand">
       <h1 id="lab-name">Catálogo de Productos</h1>
-      <p class="brand-sub" id="lab-sub">Actualizado desde planilla</p>
+      <p class="brand-sub" id="lab-sub">Armá tu pedido y te contactamos para coordinarlo</p>
     </div>
   </div>
 
-  <!-- Buscador arriba, categorías debajo (se acumulan en filas si no entran) -->
   <div class="filter-row">
     <input type="text" id="search-input" placeholder="Buscar producto, código, categoría o laboratorio…" autocomplete="off">
     <div id="category-chips" class="category-chips"></div>
@@ -37,15 +34,58 @@
 </main>
 
 <footer class="site-footer">
-  <p>Este catálogo se lee en vivo desde una planilla de Google Sheets.</p>
+  <p>Este catálogo se lee en vivo desde una planilla de Google Sheets. Armá tu pedido con el botón de abajo — no se realiza ningún cobro en esta página.</p>
 </footer>
 
-<!-- Modal de detalle: un solo bloque reutilizado para cualquier producto.
-     Arranca oculto (hidden) y script.js le carga el contenido al clickear una tarjeta. -->
+<!-- Botón flotante del carrito: siempre visible, muestra cuántos productos distintos hay cargados -->
+<button id="cart-fab" class="cart-fab" type="button" aria-haspopup="dialog">
+  <span aria-hidden="true">🛒</span> Mi pedido
+  <span id="cart-count" class="cart-count" hidden>0</span>
+</button>
+
+<!-- Modal de detalle de un producto -->
 <div id="product-modal" class="modal-overlay" hidden>
   <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <button id="modal-close" class="modal-close" aria-label="Cerrar">✕</button>
+    <button class="modal-close" data-close-modal="product-modal" aria-label="Cerrar">✕</button>
     <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Modal del carrito / pedido -->
+<div id="cart-modal" class="modal-overlay" hidden>
+  <div class="modal-content cart-modal-content" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <button class="modal-close" data-close-modal="cart-modal" aria-label="Cerrar">✕</button>
+    <div class="cart-modal-inner">
+      <h2 id="cart-title">Tu pedido</h2>
+
+      <div id="cart-items" class="cart-items"></div>
+      <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos. Cerrá esta ventana y elegí cantidades desde el catálogo.</p>
+
+      <div class="cart-form">
+        <h3>Tus datos de contacto</h3>
+        <label>Nombre*
+          <input id="cart-nombre" type="text" autocomplete="given-name">
+        </label>
+        <label>Apellido o Entidad*
+          <input id="cart-apellido" type="text" autocomplete="family-name">
+        </label>
+        <label>WhatsApp
+          <input id="cart-whatsapp" type="tel" placeholder="+54 9 11 1234-5678" autocomplete="tel">
+        </label>
+        <label>Email
+          <input id="cart-email" type="email" placeholder="tu@email.com" autocomplete="email">
+        </label>
+        <p class="cart-hint">Completá al menos un WhatsApp o un Email para que podamos contactarte.</p>
+      </div>
+
+      <div id="cart-status" class="cart-status" hidden></div>
+
+      <div class="cart-actions">
+        <button id="clear-cart-btn" class="btn-secondary" type="button">Vaciar pedido</button>
+        <button id="send-whatsapp-btn" class="btn-primary" type="button">Enviar por WhatsApp</button>
+        <button id="send-email-btn" class="btn-primary" type="button">Enviar por Email</button>
+      </div>
+    </div>
   </div>
 </div>
 
