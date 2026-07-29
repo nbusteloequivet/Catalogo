@@ -7,7 +7,7 @@ const CONFIG = {
 
   // Nombre y bajada que se muestran arriba de todo, centrados
   LAB_NAME: "EquiVet",
-  LAB_SUBTITLE: "SLOGAN",
+  LAB_SUBTITLE: "Juntos por el bienestar animal",
 
   // Cada cuánto se vuelve a consultar la planilla sola, en milisegundos
   // (30000 = 30 segundos, 60000 = 1 minuto)
