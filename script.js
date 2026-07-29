@@ -7,35 +7,33 @@ const CONFIG = {
 
   // Nombre y bajada que se muestran arriba de todo, centrados
   LAB_NAME: "EquiVet",
-  LAB_SUBTITLE: "Juntos por el bienestar animal",
+  LAB_SUBTITLE: "SLOGAN",
 
   // Cada cuánto se vuelve a consultar la planilla sola, en milisegundos
-  // (30000 = 30 segundos, 60000 = 1 minuto)
   AUTO_REFRESH_MS: 30000,
 
-  // Ancho de imagen que se le pide a Drive (afecta la nitidez y el peso)
+  // Ancho de imagen que se le pide a Drive
   IMAGE_WIDTH: 500,
+
+  // ---- Datos de destino del pedido: A DÓNDE TE LLEGA A VOS ----
+  // Tu número de WhatsApp en formato internacional, SIN "+" y sin espacios.
+  // Ejemplo Argentina: 54 9 11 2233-4455  →  "5491122334455"
+  ORDER_WHATSAPP_NUMBER: "5491140781821",
+
+  // El email tuyo (o del laboratorio) donde querés recibir los pedidos.
+  ORDER_EMAIL: "nbustelo.equivet@gmail.com",
 };
 
-/* Colores para distinguir categorías a simple vista (franja de la tarjeta
-   y chip activo). Se usan en orden y se repiten en ciclo si hay más
-   categorías que colores. Para agregar/cambiar un color, edita esta lista. */
+/* Colores para distinguir categorías a simple vista. */
 const CATEGORY_COLORS = [
-  "#b200ff", // violeta (color de marca)
-  "#000000", // negro
-  "#ff2ecb", // magenta
-  "#00b3c6", // turquesa
-  "#ff7a00", // naranja
-  "#00a651", // verde
-  "#ffcc00", // amarillo
-  "#e63946", // rojo
-  "#3a5cff", // azul
-  "#8c52ff", // lila
+  "#b200ff", "#000000", "#ff2ecb", "#00b3c6", "#ff7a00",
+  "#00a651", "#ffcc00", "#e63946", "#3a5cff", "#8c52ff",
 ];
 
-/* Columnas que el programa busca en la planilla. Los nombres se comparan
-   sin importar mayúsculas ni tildes (ver normalizeRow más abajo), así que
-   "Categoría", "categoria" y "CATEGORIA" son todos válidos. */
+/* Columnas que el programa busca en la planilla (sin importar mayúsculas
+   ni tildes). El precio, moneda e IVA se siguen leyendo por si los usás en
+   el futuro, pero a propósito NO se muestran en la página: el cliente solo
+   ve "En stock" / "A pedido" (columna "disponibilidad"). */
 const COLUMNS = {
   name: "nombre",
   category: "categoria",
@@ -47,6 +45,7 @@ const COLUMNS = {
   lab: "laboratorio",
   description: "descripcion",
   image: "imagen",
+  availability: "disponibilidad",
 };
 
 /* ------------------------------------------------------------------------
@@ -56,12 +55,29 @@ let allProducts = [];
 let activeCategory = null;
 let searchTerm = "";
 let categoryColorMap = {};
-let lastFocusedElement = null;
+
+// El carrito es un objeto: { claveDelProducto: { product, qty } }
+let cart = {};
+// Referencias a los "En tu pedido: N" de cada tarjeta, para actualizarlos
+// sin tener que reconstruir toda la grilla cada vez que cambia el carrito.
+let cartIndicatorEls = {};
 
 const els = {};
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Guardamos referencias a los elementos del DOM una sola vez
+  cacheElements();
+  els.labName.textContent = CONFIG.LAB_NAME;
+  els.labSub.textContent = CONFIG.LAB_SUBTITLE;
+
+  setupSearch();
+  setupModalClosers();
+  setupCartModal();
+
+  loadCatalog();
+  setInterval(loadCatalog, CONFIG.AUTO_REFRESH_MS);
+});
+
+function cacheElements() {
   els.grid = document.getElementById("catalog-grid");
   els.statusBanner = document.getElementById("status-banner");
   els.emptyState = document.getElementById("empty-state");
@@ -69,54 +85,36 @@ document.addEventListener("DOMContentLoaded", () => {
   els.categoryChips = document.getElementById("category-chips");
   els.labName = document.getElementById("lab-name");
   els.labSub = document.getElementById("lab-sub");
-  els.modalOverlay = document.getElementById("product-modal");
+
+  els.productModal = document.getElementById("product-modal");
   els.modalBody = document.getElementById("modal-body");
-  els.modalClose = document.getElementById("modal-close");
 
-  els.labName.textContent = CONFIG.LAB_NAME;
-  els.labSub.textContent = CONFIG.LAB_SUBTITLE;
-
-  // Búsqueda con debounce: espera a que la persona deje de tipear 200ms
-  // antes de filtrar, para no recalcular en cada tecla innecesariamente.
-  let searchDebounce;
-  els.searchInput.addEventListener("input", (e) => {
-    clearTimeout(searchDebounce);
-    const value = e.target.value;
-    searchDebounce = setTimeout(() => {
-      searchTerm = value.trim().toLowerCase();
-      renderGrid();
-    }, 200);
-  });
-
-  // Cierre del modal: botón, click fuera de la tarjeta, o tecla Escape
-  els.modalClose.addEventListener("click", closeModal);
-  els.modalOverlay.addEventListener("click", (e) => {
-    if (e.target === els.modalOverlay) closeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !els.modalOverlay.hidden) closeModal();
-  });
-
-  loadCatalog();
-  setInterval(loadCatalog, CONFIG.AUTO_REFRESH_MS);
-});
+  els.cartFab = document.getElementById("cart-fab");
+  els.cartCount = document.getElementById("cart-count");
+  els.cartModal = document.getElementById("cart-modal");
+  els.cartItemsEl = document.getElementById("cart-items");
+  els.cartEmptyEl = document.getElementById("cart-empty");
+  els.cartNombre = document.getElementById("cart-nombre");
+  els.cartApellido = document.getElementById("cart-apellido");
+  els.cartWhatsapp = document.getElementById("cart-whatsapp");
+  els.cartEmail = document.getElementById("cart-email");
+  els.cartStatus = document.getElementById("cart-status");
+  els.clearCartBtn = document.getElementById("clear-cart-btn");
+  els.sendWhatsappBtn = document.getElementById("send-whatsapp-btn");
+  els.sendEmailBtn = document.getElementById("send-email-btn");
+}
 
 /* ------------------------------------------------------------------------
    Carga de datos desde el CSV publicado
    ------------------------------------------------------------------------ */
 function loadCatalog() {
   if (!CONFIG.SHEET_CSV_URL || CONFIG.SHEET_CSV_URL.includes("PEGAR_AQUI")) {
-    showStatus(
-      "Todavía no configuraste la URL de la planilla. Completá CONFIG.SHEET_CSV_URL arriba de todo en script.js. Mientras tanto, te mostramos productos de ejemplo.",
-      "info"
-    );
+    showStatus("Todavía no configuraste CONFIG.SHEET_CSV_URL en script.js. Mostrando productos de ejemplo.", "info");
     allProducts = DEMO_PRODUCTS;
     finishLoad();
     return;
   }
 
-  // "cache bust": le agregamos un parámetro único a la URL para que el
-  // navegador no nos devuelva una copia vieja guardada en caché.
   const url = CONFIG.SHEET_CSV_URL + (CONFIG.SHEET_CSV_URL.includes("?") ? "&" : "?") + "_=" + Date.now();
 
   Papa.parse(url, {
@@ -127,30 +125,21 @@ function loadCatalog() {
       try {
         const products = results.data.map(normalizeRow).filter((p) => p.name !== "");
         if (products.length === 0) {
-          showStatus(
-            "La planilla se pudo leer pero no encontramos ninguna fila con la columna 'nombre' completa. Revisá los encabezados de la primera fila.",
-            "info"
-          );
+          showStatus("La planilla se pudo leer pero no encontramos filas con 'nombre' completo. Revisá los encabezados.", "info");
         } else {
           hideStatus();
         }
         allProducts = products;
       } catch (err) {
-        // Si algo inesperado rompe el procesamiento, no dejamos la página
-        // en blanco: mostramos el aviso y seguimos con lo último que
-        // teníamos cargado (o la demo si es la primera carga).
         console.error("Error procesando la planilla:", err);
-        showStatus("Ocurrió un error interpretando los datos de la planilla. Mostrando la última versión disponible.", "error");
+        showStatus("Ocurrió un error interpretando los datos. Mostrando la última versión disponible.", "error");
         if (allProducts.length === 0) allProducts = DEMO_PRODUCTS;
       }
       finishLoad();
     },
     error: (err) => {
       console.error("Error descargando el CSV:", err);
-      showStatus(
-        "No se pudo leer la planilla. Revisá que CONFIG.SHEET_CSV_URL sea correcta y que siga publicada como CSV.",
-        "error"
-      );
+      showStatus("No se pudo leer la planilla. Revisá CONFIG.SHEET_CSV_URL.", "error");
       if (allProducts.length === 0) allProducts = DEMO_PRODUCTS;
       finishLoad();
     },
@@ -165,21 +154,11 @@ function finishLoad() {
 /* ------------------------------------------------------------------------
    Normalización de filas de la planilla
    ------------------------------------------------------------------------ */
-
-// Quita tildes y pasa a minúscula: "Categoría" y "categoria" quedan iguales.
 function normalizeHeader(text) {
-  return (text || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
+  return (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 }
 
 function normalizeRow(rawRow) {
-  // Papa Parse nos da un objeto por fila con las claves tal cual están
-  // escritas en la planilla. Acá lo pasamos a un objeto con claves
-  // "limpias" (sin tildes, en minúscula) para no depender de cómo
-  // exactamente se escribió el encabezado.
   const row = {};
   for (const key in rawRow) {
     row[normalizeHeader(key)] = (rawRow[key] ?? "").toString().trim();
@@ -189,17 +168,17 @@ function normalizeRow(rawRow) {
     name: row[COLUMNS.name] || "",
     category: row[COLUMNS.category] || "General",
     subcategory: row[COLUMNS.subcategory] || "",
-    price: parsePrice(row[COLUMNS.price]),
-    currency: row[COLUMNS.currency] || "",
-    hasIVA: isIVA(row[COLUMNS.iva]),
+    price: parsePrice(row[COLUMNS.price]),       // se lee pero no se muestra
+    currency: row[COLUMNS.currency] || "",        // se lee pero no se muestra
+    hasIVA: isIVA(row[COLUMNS.iva]),              // se lee pero no se muestra
     code: row[COLUMNS.code] || "",
     lab: row[COLUMNS.lab] || "",
     description: row[COLUMNS.description] || "",
     imageUrl: toDirectDriveUrl(row[COLUMNS.image]),
+    availability: normalizeAvailability(row[COLUMNS.availability]),
   };
 }
 
-// Acepta "10", "10.500", "10.500,50" o "$10.500". Devuelve un número o null.
 function parsePrice(raw) {
   if (!raw) return null;
   const cleaned = raw.replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", ".");
@@ -207,24 +186,19 @@ function parsePrice(raw) {
   return isNaN(n) ? null : n;
 }
 
-// Formatea el precio igual que antes: "$ 8.500"
-function formatPrice(n) {
-  if (n === null || n === undefined) return "Consultar";
-  return "$ " + n.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-}
-
-// La columna IVA solo dispara el cartel "+IVA" si dice, literalmente,
-// "+iva" o "iva" (sin importar mayúsculas/espacios). Cualquier otro
-// valor (vacío, "no", etc.) no muestra nada.
 function isIVA(raw) {
   if (!raw) return false;
   return /^\+?\s*iva$/i.test(raw.trim());
 }
 
-/* ------------------------------------------------------------------------
-   Conversión de links de Google Drive a URL de imagen directa.
-   Acepta los formatos típicos que da el botón "Compartir" de Drive.
-   ------------------------------------------------------------------------ */
+// La columna "disponibilidad" solo distingue dos estados para el cliente:
+// si el texto incluye la palabra "pedido" (ej. "A pedido") se muestra así;
+// cualquier otro valor, o la celda vacía, se toma como "En stock".
+function normalizeAvailability(raw) {
+  const v = (raw || "").toLowerCase();
+  return v.includes("pedido") ? "A pedido" : "En stock";
+}
+
 function extractDriveId(url) {
   if (!url) return null;
   let m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
@@ -237,8 +211,29 @@ function extractDriveId(url) {
 function toDirectDriveUrl(url) {
   if (!url) return null;
   const id = extractDriveId(url);
-  if (!id) return url; // no era un link de Drive: se usa tal cual
+  if (!id) return url;
   return `https://lh3.googleusercontent.com/d/${id}=w${CONFIG.IMAGE_WIDTH}`;
+}
+
+// Clave única por producto: preferimos el código; si no tiene, usamos
+// nombre+categoría para evitar mezclar productos distintos sin código.
+function productKey(p) {
+  return p.code ? `code:${p.code}` : `nc:${p.name}|${p.category}`;
+}
+
+/* ------------------------------------------------------------------------
+   Búsqueda
+   ------------------------------------------------------------------------ */
+function setupSearch() {
+  let debounceTimer;
+  els.searchInput.addEventListener("input", (e) => {
+    clearTimeout(debounceTimer);
+    const value = e.target.value;
+    debounceTimer = setTimeout(() => {
+      searchTerm = value.trim().toLowerCase();
+      renderGrid();
+    }, 200);
+  });
 }
 
 /* ------------------------------------------------------------------------
@@ -281,6 +276,7 @@ function renderGrid() {
   });
 
   els.grid.innerHTML = "";
+  cartIndicatorEls = {};
 
   if (filtered.length === 0) {
     els.emptyState.hidden = false;
@@ -288,26 +284,21 @@ function renderGrid() {
   }
   els.emptyState.hidden = true;
 
-  // DocumentFragment: arma todas las tarjetas en memoria y las inserta de
-  // una sola vez, en lugar de tocar el DOM producto por producto.
   const fragment = document.createDocumentFragment();
   filtered.forEach((p) => fragment.appendChild(buildCard(p)));
   els.grid.appendChild(fragment);
 }
 
-// Arma el texto "$ 8.500 ARS +IVA" (moneda e IVA son opcionales)
-function priceLineHtml(p) {
-  const currency = p.currency ? ` <span class="card-currency">${escapeHtml(p.currency)}</span>` : "";
-  const iva = p.hasIVA ? ` <span class="iva-tag">+IVA</span>` : "";
-  return `<span class="card-price">${formatPrice(p.price)}</span>${currency}${iva}`;
+function availabilityTagHtml(p) {
+  const cls = p.availability === "En stock" ? "in" : "out";
+  return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
 }
 
 function buildCard(p) {
+  const key = productKey(p);
+
   const card = document.createElement("article");
   card.className = "product-card";
-  card.tabIndex = 0;
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `Ver detalle de ${p.name}`);
 
   const strip = document.createElement("div");
   strip.className = "card-strip";
@@ -324,6 +315,7 @@ function buildCard(p) {
   const media = document.createElement("div");
   media.className = "card-media";
   media.appendChild(buildImageEl(p, false));
+  media.addEventListener("click", () => openProductModal(p));
   card.appendChild(media);
 
   const body = document.createElement("div");
@@ -332,24 +324,90 @@ function buildCard(p) {
     <h3 class="card-title">${escapeHtml(p.name)}</h3>
     <span class="card-category">${escapeHtml(p.category)}</span>
     ${p.subcategory ? `<span class="card-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
-    <div class="card-footer">${priceLineHtml(p)}</div>
+    <div class="card-footer">${availabilityTagHtml(p)}</div>
   `;
+  body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
+
+  const cartRow = buildCartRow(p, key);
+  body.appendChild(cartRow.wrapper);
   card.appendChild(body);
 
-  // La tarjeta entera (incluida la imagen) abre el detalle, por click o
-  // por teclado (Enter / espacio) para que sea accesible.
-  card.addEventListener("click", () => openModal(p));
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openModal(p);
-    }
-  });
+  cartIndicatorEls[key] = cartRow.indicatorEl;
+  updateCartIndicator(key);
 
   return card;
 }
 
-// Crea el <img> (o el cartel "sin imagen") para tarjeta o modal
+// Controles de cantidad + botón "Agregar" (reutilizados en tarjeta y modal)
+function buildCartRow(p, key) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "card-cart-row";
+
+  const qtyControl = document.createElement("div");
+  qtyControl.className = "qty-control";
+
+  const minusBtn = document.createElement("button");
+  minusBtn.type = "button";
+  minusBtn.className = "qty-btn";
+  minusBtn.textContent = "−";
+  minusBtn.setAttribute("aria-label", "Restar uno");
+
+  const qtyInput = document.createElement("input");
+  qtyInput.type = "number";
+  qtyInput.className = "qty-input";
+  qtyInput.min = "0";
+  qtyInput.value = "1";
+  qtyInput.setAttribute("aria-label", `Cantidad de ${p.name}`);
+
+  const plusBtn = document.createElement("button");
+  plusBtn.type = "button";
+  plusBtn.className = "qty-btn";
+  plusBtn.textContent = "+";
+  plusBtn.setAttribute("aria-label", "Sumar uno");
+
+  const stopBubble = (fn) => (e) => { e.stopPropagation(); fn(e); };
+
+  minusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = Math.max(0, safeInt(qtyInput.value) - 1);
+  }));
+  plusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = safeInt(qtyInput.value) + 1;
+  }));
+  qtyInput.addEventListener("click", (e) => e.stopPropagation());
+
+  qtyControl.append(minusBtn, qtyInput, plusBtn);
+
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "add-btn";
+  addBtn.textContent = "Agregar";
+  addBtn.addEventListener("click", stopBubble(() => {
+    const qty = safeInt(qtyInput.value);
+    if (qty <= 0) {
+      removeFromCart(key);
+    } else {
+      addToCart(p, key, qty);
+    }
+  }));
+
+  wrapper.append(qtyControl, addBtn);
+
+  const indicatorEl = document.createElement("div");
+  indicatorEl.className = "cart-indicator";
+  indicatorEl.hidden = true;
+
+  const outer = document.createElement("div");
+  outer.appendChild(wrapper);
+  outer.appendChild(indicatorEl);
+
+  return { wrapper: outer, indicatorEl };
+}
+
+function safeInt(value) {
+  const n = parseInt(value, 10);
+  return isNaN(n) || n < 0 ? 0 : n;
+}
+
 function buildImageEl(p, large) {
   if (!p.imageUrl) {
     const placeholder = document.createElement("div");
@@ -377,11 +435,10 @@ function escapeHtml(str) {
 }
 
 /* ------------------------------------------------------------------------
-   Modal de detalle (punto 7.2 del pedido)
+   Modal de detalle de producto
    ------------------------------------------------------------------------ */
-function openModal(p) {
-  lastFocusedElement = document.activeElement;
-
+function openProductModal(p) {
+  const key = productKey(p);
   els.modalBody.innerHTML = "";
 
   const media = document.createElement("div");
@@ -394,33 +451,226 @@ function openModal(p) {
     <h2 id="modal-title">${escapeHtml(p.name)}</h2>
     <span class="modal-category">${escapeHtml(p.category)}</span>
     ${p.subcategory ? `<span class="modal-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
-    <div class="modal-price-row">${priceLineHtmlModal(p)}</div>
+    <div class="modal-avail-row">${availabilityTagHtml(p)}</div>
     ${p.lab ? `<div class="modal-row"><span class="k">Laboratorio</span><span>${escapeHtml(p.lab)}</span></div>` : ""}
     ${p.description ? `<p class="modal-desc">${escapeHtml(p.description)}</p>` : ""}
   `;
 
+  const cartRow = buildCartRow(p, key);
+  cartRow.wrapper.querySelector(".card-cart-row").classList.add("modal-cart-row");
+  info.appendChild(cartRow.wrapper);
+
   els.modalBody.appendChild(media);
   els.modalBody.appendChild(info);
 
-  els.modalOverlay.hidden = false;
-  document.body.style.overflow = "hidden"; // evita el scroll de fondo
-  els.modalClose.focus();
-}
+  // El indicador de este modal también se registra para poder actualizarlo,
+  // sobrescribiendo temporalmente al de la tarjeta (se reconstruye cuando
+  // se cierra el modal, ver closeAllModals).
+  cartIndicatorEls[key] = cartRow.indicatorEl;
+  updateCartIndicator(key);
 
-function priceLineHtmlModal(p) {
-  const currency = p.currency ? ` <span class="card-currency">${escapeHtml(p.currency)}</span>` : "";
-  const iva = p.hasIVA ? ` <span class="iva-tag">+IVA</span>` : "";
-  return `<span class="modal-price">${formatPrice(p.price)}</span>${currency}${iva}`;
-}
-
-function closeModal() {
-  els.modalOverlay.hidden = true;
-  document.body.style.overflow = "";
-  if (lastFocusedElement) lastFocusedElement.focus();
+  openModalEl(els.productModal);
 }
 
 /* ------------------------------------------------------------------------
-   Banner de estado (avisos y errores de carga)
+   Apertura / cierre genérico de modales
+   ------------------------------------------------------------------------ */
+function openModalEl(modalEl) {
+  modalEl.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function closeModalEl(modalEl) {
+  modalEl.hidden = true;
+  if (els.productModal.hidden && els.cartModal.hidden) {
+    document.body.style.overflow = "";
+  }
+  // Al cerrar, reconstruimos la grilla para que los indicadores de cantidad
+  // vuelvan a apuntar a los elementos de las tarjetas (y no a los del modal).
+  if (modalEl === els.productModal) renderGrid();
+}
+
+function setupModalClosers() {
+  document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+    btn.addEventListener("click", () => closeModalEl(document.getElementById(btn.dataset.closeModal)));
+  });
+  [els.productModal, els.cartModal].forEach((overlay) => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModalEl(overlay);
+    });
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (!els.cartModal.hidden) closeModalEl(els.cartModal);
+    else if (!els.productModal.hidden) closeModalEl(els.productModal);
+  });
+}
+
+/* ------------------------------------------------------------------------
+   Carrito
+   ------------------------------------------------------------------------ */
+function addToCart(product, key, qty) {
+  cart[key] = { product, qty };
+  updateCartIndicator(key);
+  updateCartFabCount();
+}
+
+function removeFromCart(key) {
+  delete cart[key];
+  updateCartIndicator(key);
+  updateCartFabCount();
+  renderCartModal();
+}
+
+function updateCartIndicator(key) {
+  const el = cartIndicatorEls[key];
+  if (!el) return;
+  const entry = cart[key];
+  if (entry && entry.qty > 0) {
+    el.hidden = false;
+    el.textContent = `En tu pedido: ${entry.qty}`;
+  } else {
+    el.hidden = true;
+    el.textContent = "";
+  }
+}
+
+function updateCartFabCount() {
+  const distinctItems = Object.keys(cart).length;
+  els.cartCount.hidden = distinctItems === 0;
+  els.cartCount.textContent = String(distinctItems);
+}
+
+function setupCartModal() {
+  els.cartFab.addEventListener("click", () => {
+    renderCartModal();
+    openModalEl(els.cartModal);
+  });
+
+  els.clearCartBtn.addEventListener("click", () => {
+    cart = {};
+    Object.keys(cartIndicatorEls).forEach(updateCartIndicator);
+    updateCartFabCount();
+    renderCartModal();
+    showCartStatus("Vaciaste tu pedido.", "success");
+  });
+
+  els.sendWhatsappBtn.addEventListener("click", () => sendOrder("whatsapp"));
+  els.sendEmailBtn.addEventListener("click", () => sendOrder("email"));
+}
+
+function renderCartModal() {
+  const items = Object.entries(cart);
+  els.cartItemsEl.innerHTML = "";
+  els.cartEmptyEl.hidden = items.length > 0;
+
+  items.forEach(([key, entry]) => {
+    const row = document.createElement("div");
+    row.className = "cart-item";
+    row.innerHTML = `
+      <div class="cart-item-info">
+        <div class="cart-item-name">${escapeHtml(entry.product.name)}</div>
+        <div class="cart-item-meta">${escapeHtml(entry.product.code || entry.product.category)}</div>
+      </div>
+    `;
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.min = "0";
+    qtyInput.className = "cart-item-qty";
+    qtyInput.value = String(entry.qty);
+    qtyInput.setAttribute("aria-label", `Cantidad de ${entry.product.name}`);
+    qtyInput.addEventListener("change", () => {
+      const qty = safeInt(qtyInput.value);
+      if (qty <= 0) {
+        removeFromCart(key);
+      } else {
+        entry.qty = qty;
+        updateCartIndicator(key);
+      }
+    });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "cart-item-remove";
+    removeBtn.textContent = "✕";
+    removeBtn.setAttribute("aria-label", `Quitar ${entry.product.name}`);
+    removeBtn.addEventListener("click", () => removeFromCart(key));
+
+    row.appendChild(qtyInput);
+    row.appendChild(removeBtn);
+    els.cartItemsEl.appendChild(row);
+  });
+}
+
+function showCartStatus(msg, type) {
+  els.cartStatus.hidden = false;
+  els.cartStatus.textContent = msg;
+  els.cartStatus.className = "cart-status " + type;
+}
+function hideCartStatus() {
+  els.cartStatus.hidden = true;
+}
+
+/* ------------------------------------------------------------------------
+   Envío del pedido (WhatsApp o Email) — sin backend: se arma el mensaje y
+   se abre la app de WhatsApp / el cliente de correo ya con el texto
+   cargado. La persona que hace el pedido tiene que confirmar el envío
+   desde ahí; nosotros no mandamos nada automáticamente por su cuenta.
+   ------------------------------------------------------------------------ */
+function sendOrder(channel) {
+  hideCartStatus();
+
+  const items = Object.values(cart);
+  const nombre = els.cartNombre.value.trim();
+  const apellido = els.cartApellido.value.trim();
+  const whatsapp = els.cartWhatsapp.value.trim();
+  const email = els.cartEmail.value.trim();
+
+  if (items.length === 0) {
+    showCartStatus("Todavía no agregaste ningún producto al pedido.", "error");
+    return;
+  }
+  if (!nombre || !apellido) {
+    showCartStatus("Completá nombre y apellido/entidad antes de enviar.", "error");
+    return;
+  }
+  if (!whatsapp && !email) {
+    showCartStatus("Dejanos un WhatsApp o un Email de contacto.", "error");
+    return;
+  }
+
+  const message = buildOrderMessage({ nombre, apellido, whatsapp, email, items });
+
+  if (channel === "whatsapp") {
+    const url = `https://wa.me/${CONFIG.ORDER_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  } else {
+    const subject = encodeURIComponent(`Pedido - ${CONFIG.LAB_NAME} - ${nombre} ${apellido}`);
+    const body = encodeURIComponent(message);
+    window.location.href = `mailto:${CONFIG.ORDER_EMAIL}?subject=${subject}&body=${body}`;
+  }
+
+  showCartStatus("Se abrió WhatsApp/tu correo con el pedido cargado. Confirmá el envío desde ahí y después podés vaciar el pedido.", "success");
+}
+
+function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
+  const lines = [];
+  lines.push(`Pedido - ${CONFIG.LAB_NAME}`);
+  lines.push("");
+  lines.push(`Cliente: ${nombre} ${apellido}`);
+  if (whatsapp) lines.push(`WhatsApp: ${whatsapp}`);
+  if (email) lines.push(`Email: ${email}`);
+  lines.push("");
+  lines.push("Productos:");
+  items.forEach(({ product, qty }) => {
+    const codePart = product.code ? ` (${product.code})` : "";
+    lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
+  });
+  return lines.join("\n");
+}
+
+/* ------------------------------------------------------------------------
+   Banner de estado del catálogo
    ------------------------------------------------------------------------ */
 function showStatus(msg, type) {
   els.statusBanner.hidden = false;
@@ -432,12 +682,12 @@ function hideStatus() {
 }
 
 /* ------------------------------------------------------------------------
-   Datos de ejemplo — solo se muestran si todavía no configuraste
-   CONFIG.SHEET_CSV_URL, o si falla la lectura de la planilla.
+   Datos de ejemplo — solo se muestran si no configuraste la planilla o
+   falla la lectura.
    ------------------------------------------------------------------------ */
 const DEMO_PRODUCTS = [
-  { name: "Reactivo Buffer Fosfato PBS 1X", category: "Reactivos", subcategory: "Buffers", price: 8500, currency: "ARS", hasIVA: true, code: "RF-1042", lab: "BioLab SA", description: "Solución tamponadora estéril, pH 7.4, uso general en cultivo celular.", imageUrl: null },
-  { name: "Tubos Falcon 15 ml", category: "Descartables", subcategory: "Tubos", price: 3200, currency: "ARS", hasIVA: false, code: "DS-2210", lab: "PlastiCiencia", description: "Tubos cónicos estériles con tapa a rosca, graduados.", imageUrl: null },
-  { name: "Kit Extracción de ADN", category: "Kits", subcategory: "Genómica", price: 45200, currency: "USD", hasIVA: true, code: "KT-0091", lab: "GenTech", description: "Kit de columna para extracción de ADN genómico de muestras de tejido.", imageUrl: null },
-  { name: "Guantes de Nitrilo Talle M", category: "Descartables", subcategory: "Protección", price: 6100, currency: "ARS", hasIVA: false, code: "DS-3305", lab: "SafeHand", description: "Guantes sin polvo, resistentes a solventes.", imageUrl: null },
+  { name: "Reactivo Buffer Fosfato PBS 1X", category: "Reactivos", subcategory: "Buffers", price: 8500, currency: "ARS", hasIVA: true, code: "RF-1042", lab: "BioLab SA", description: "Solución tamponadora estéril, pH 7.4, uso general en cultivo celular.", imageUrl: null, availability: "En stock" },
+  { name: "Tubos Falcon 15 ml", category: "Descartables", subcategory: "Tubos", price: 3200, currency: "ARS", hasIVA: false, code: "DS-2210", lab: "PlastiCiencia", description: "Tubos cónicos estériles con tapa a rosca, graduados.", imageUrl: null, availability: "En stock" },
+  { name: "Kit Extracción de ADN", category: "Kits", subcategory: "Genómica", price: 45200, currency: "USD", hasIVA: true, code: "KT-0091", lab: "GenTech", description: "Kit de columna para extracción de ADN genómico de muestras de tejido.", imageUrl: null, availability: "A pedido" },
+  { name: "Guantes de Nitrilo Talle M", category: "Descartables", subcategory: "Protección", price: 6100, currency: "ARS", hasIVA: false, code: "DS-3305", lab: "SafeHand", description: "Guantes sin polvo, resistentes a solventes.", imageUrl: null, availability: "En stock" },
 ];
