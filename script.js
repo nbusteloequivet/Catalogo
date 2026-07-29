@@ -18,7 +18,7 @@ const CONFIG = {
   // ---- Datos de destino del pedido: A DÓNDE TE LLEGA A VOS ----
   // Tu número de WhatsApp en formato internacional, SIN "+" y sin espacios.
   // Ejemplo Argentina: 54 9 11 2233-4455  →  "5491122334455"
-  ORDER_WHATSAPP_NUMBER: "5491140781821",
+  ORDER_WHATSAPP_NUMBER: "5491140780872",
 
   // El email tuyo (o del laboratorio) donde querés recibir los pedidos.
   ORDER_EMAIL: "nbustelo.equivet@gmail.com",
