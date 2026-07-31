@@ -14,13 +14,18 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="brand">
+      <!-- El logo va sobre una placa oscura: el archivo trae el texto
+           "Veterinaria Equina" en blanco, pensado para fondos oscuros. -->
+      <span class="brand-emblem">
+        <img id="brand-logo" src="" alt="Logo EquiVet">
+      </span>
       <h1 id="lab-name">Catálogo de Productos</h1>
       <p class="brand-sub" id="lab-sub">Armá tu pedido y te contactamos para coordinarlo</p>
     </div>
   </div>
 
   <div class="filter-row">
-    <input type="text" id="search-input" placeholder="Buscar producto, código, categoría o laboratorio…" autocomplete="off">
+    <input type="text" id="search-input" placeholder="Buscar producto, categoría o laboratorio…" autocomplete="off">
     <div id="category-chips" class="category-chips"></div>
   </div>
 </header>
@@ -72,11 +77,16 @@
   <p>Este catálogo se lee en vivo desde una planilla de Google Sheets. Armá tu pedido con el botón de abajo — no se realiza ningún cobro en esta página.</p>
 </footer>
 
-<!-- Botón flotante del carrito: siempre visible, muestra cuántos productos distintos hay cargados -->
-<button id="cart-fab" class="cart-fab" type="button" aria-haspopup="dialog">
-  <span aria-hidden="true">🛒</span> Mi pedido
-  <span id="cart-count" class="cart-count" hidden>0</span>
-</button>
+<!-- Botones flotantes: Contacto (baja a la sección de contacto) y Mi pedido -->
+<div class="fab-stack">
+  <button id="contact-fab" class="fab fab-secondary" type="button">
+    <span aria-hidden="true">📍</span> Contacto
+  </button>
+  <button id="cart-fab" class="fab fab-primary" type="button" aria-haspopup="dialog">
+    <span aria-hidden="true">🧾</span> Mi pedido
+    <span id="cart-count" class="cart-count" hidden>0</span>
+  </button>
+</div>
 
 <!-- Modal de detalle de un producto -->
 <div id="product-modal" class="modal-overlay" hidden>
@@ -110,7 +120,7 @@
         <label>Email
           <input id="cart-email" type="email" placeholder="tu@email.com" autocomplete="email">
         </label>
-        <p class="cart-hint">Completá al menos un WhatsApp o un Email para que podamos enviarte la cotizacion</p>
+        <p class="cart-hint">Completá al menos un WhatsApp o un Email para que podamos enviarte la cotización</p>
       </div>
 
       <div id="cart-status" class="cart-status" hidden></div>
@@ -124,6 +134,11 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="script.js"></script>
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
