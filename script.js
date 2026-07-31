@@ -16,12 +16,36 @@ const CONFIG = {
   IMAGE_WIDTH: 500,
 
   // ---- Datos de destino del pedido: A DÓNDE TE LLEGA A VOS ----
-  // Tu número de WhatsApp en formato internacional, SIN "+" y sin espacios.
-  // Ejemplo Argentina: 54 9 11 2233-4455  →  "5491122334455"
-  ORDER_WHATSAPP_NUMBER: "5491140780872",
-
   // El email tuyo (o del laboratorio) donde querés recibir los pedidos.
   ORDER_EMAIL: "nbustelo.equivet@gmail.com",
+
+  // Asunto FIJO para todos los mails de cotización que salen desde la página.
+  // Se usa siempre el mismo texto (sin nombre del cliente ni nada variable)
+  // para que después en tu casilla de mail puedas filtrarlos/agruparlos
+  // todos en una misma carpeta por asunto.
+  ORDER_EMAIL_SUBJECT: "Pedido de cotización - EquiVet",
+
+  // ---- Datos de contacto de la empresa (sección "Contacto" al pie del catálogo) ----
+  // Link de Instagram al que se redirige al hacer click.
+  COMPANY_INSTAGRAM_URL: "https://instagram.com/tu_usuario",
+  COMPANY_INSTAGRAM_HANDLE: "@tu_usuario",
+
+  // WhatsApp de la empresa para que el cliente abra el chat directo (esto es
+  // distinto del WhatsApp que el cliente carga como su propio dato de contacto).
+  // Mismo formato que antes: internacional, sin "+" y sin espacios.
+  COMPANY_WHATSAPP_NUMBER: "5491140780872",
+  COMPANY_WHATSAPP_DISPLAY: "+54 9 11 4078-0872",
+
+  // Email de la empresa. Se usa para el link "mailto" de la sección de contacto
+  // (podés repetir ORDER_EMAIL o poner otro distinto).
+  COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
+
+  // Horarios laborales, en texto libre.
+  COMPANY_HOURS: "Lunes a viernes de 9 a 18 hs",
+
+  // Dirección física de la empresa. Se usa tanto para mostrarla en texto
+  // como para armar el mapa y el link a Google Maps.
+  COMPANY_ADDRESS: "Av. Ejemplo 1234, Buenos Aires, Argentina",
 };
 
 /* Colores para distinguir categorías a simple vista. */
@@ -72,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSearch();
   setupModalClosers();
   setupCartModal();
+  setupCompanyContact();
 
   loadCatalog();
   setInterval(loadCatalog, CONFIG.AUTO_REFRESH_MS);
@@ -100,8 +125,18 @@ function cacheElements() {
   els.cartEmail = document.getElementById("cart-email");
   els.cartStatus = document.getElementById("cart-status");
   els.clearCartBtn = document.getElementById("clear-cart-btn");
-  els.sendWhatsappBtn = document.getElementById("send-whatsapp-btn");
   els.sendEmailBtn = document.getElementById("send-email-btn");
+
+  els.contactInstagram = document.getElementById("contact-instagram");
+  els.contactInstagramValue = document.getElementById("contact-instagram-value");
+  els.contactWhatsapp = document.getElementById("contact-whatsapp");
+  els.contactWhatsappValue = document.getElementById("contact-whatsapp-value");
+  els.contactGmail = document.getElementById("contact-gmail");
+  els.contactGmailValue = document.getElementById("contact-gmail-value");
+  els.contactHoursValue = document.getElementById("contact-hours-value");
+  els.contactAddressValue = document.getElementById("contact-address-value");
+  els.contactMapLink = document.getElementById("contact-map-link");
+  els.contactMapIframe = document.getElementById("contact-map-iframe");
 }
 
 /* ------------------------------------------------------------------------
@@ -506,6 +541,34 @@ function setupModalClosers() {
 }
 
 /* ------------------------------------------------------------------------
+   Contacto de la empresa (Instagram, WhatsApp, email, horarios y mapa)
+   ------------------------------------------------------------------------ */
+function setupCompanyContact() {
+  // Instagram: abre la cuenta directamente.
+  els.contactInstagram.href = CONFIG.COMPANY_INSTAGRAM_URL;
+  els.contactInstagramValue.textContent = CONFIG.COMPANY_INSTAGRAM_HANDLE;
+
+  // WhatsApp: abre el chat con la empresa (wa.me sin texto precargado).
+  els.contactWhatsapp.href = `https://wa.me/${CONFIG.COMPANY_WHATSAPP_NUMBER}`;
+  els.contactWhatsappValue.textContent = CONFIG.COMPANY_WHATSAPP_DISPLAY;
+
+  // Gmail: abre gmail.com con un mail nuevo, destinatario y asunto ya cargados.
+  els.contactGmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}&su=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}`;
+  els.contactGmailValue.textContent = CONFIG.COMPANY_EMAIL;
+
+  // Horarios: texto libre tal cual se configuró.
+  els.contactHoursValue.textContent = CONFIG.COMPANY_HOURS;
+
+  // Ubicación: dirección en texto + mapa embebido, todo apuntando a la
+  // misma dirección de CONFIG.COMPANY_ADDRESS. Al tocar el mapa se abre
+  // Google Maps en una pestaña nueva con esa ubicación.
+  els.contactAddressValue.textContent = CONFIG.COMPANY_ADDRESS;
+  const encodedAddress = encodeURIComponent(CONFIG.COMPANY_ADDRESS);
+  els.contactMapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  els.contactMapIframe.src = `https://www.google.com/maps?q=${encodedAddress}&output=embed`;
+}
+
+/* ------------------------------------------------------------------------
    Carrito
    ------------------------------------------------------------------------ */
 function addToCart(product, key, qty) {
@@ -554,8 +617,7 @@ function setupCartModal() {
     showCartStatus("Vaciaste tu pedido.", "success");
   });
 
-  els.sendWhatsappBtn.addEventListener("click", () => sendOrder("whatsapp"));
-  els.sendEmailBtn.addEventListener("click", () => sendOrder("email"));
+  els.sendEmailBtn.addEventListener("click", sendOrder);
 }
 
 function renderCartModal() {
@@ -612,12 +674,16 @@ function hideCartStatus() {
 }
 
 /* ------------------------------------------------------------------------
-   Envío del pedido (WhatsApp o Email) — sin backend: se arma el mensaje y
-   se abre la app de WhatsApp / el cliente de correo ya con el texto
-   cargado. La persona que hace el pedido tiene que confirmar el envío
-   desde ahí; nosotros no mandamos nada automáticamente por su cuenta.
+   Envío del pedido por Email — sin backend: se arma el mensaje y se abre
+   el cliente de correo ya con el texto cargado. La persona que hace el
+   pedido tiene que confirmar el envío desde ahí; nosotros no mandamos
+   nada automáticamente por su cuenta.
+
+   El asunto es SIEMPRE el mismo (CONFIG.ORDER_EMAIL_SUBJECT) para todos
+   los pedidos, así en la casilla de mail se pueden agrupar/filtrar todos
+   juntos en una misma carpeta por asunto.
    ------------------------------------------------------------------------ */
-function sendOrder(channel) {
+function sendOrder() {
   hideCartStatus();
 
   const items = Object.values(cart);
@@ -641,16 +707,11 @@ function sendOrder(channel) {
 
   const message = buildOrderMessage({ nombre, apellido, whatsapp, email, items });
 
-  if (channel === "whatsapp") {
-    const url = `https://wa.me/${CONFIG.ORDER_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-  } else {
-    const subject = encodeURIComponent(`Pedido - ${CONFIG.LAB_NAME} - ${nombre} ${apellido}`);
-    const body = encodeURIComponent(message);
-    window.location.href = `mailto:${CONFIG.ORDER_EMAIL}?subject=${subject}&body=${body}`;
-  }
+  const subject = encodeURIComponent(CONFIG.ORDER_EMAIL_SUBJECT);
+  const body = encodeURIComponent(message);
+  window.location.href = `mailto:${CONFIG.ORDER_EMAIL}?subject=${subject}&body=${body}`;
 
-  showCartStatus("Se abrió WhatsApp/tu correo con el pedido cargado. Confirmá el envío desde ahí y después podés vaciar el pedido.", "success");
+  showCartStatus("Se abrió tu cliente de correo con el pedido cargado. Confirmá el envío desde ahí y después podés vaciar el pedido.", "success");
 }
 
 function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
