@@ -375,9 +375,11 @@ function setupCompanyContact() {
   els.contactHoursValue.textContent = CONFIG.COMPANY_HOURS;
 
   els.contactAddressValue.textContent = CONFIG.COMPANY_ADDRESS;
-  const encodedAddress = encodeURIComponent(CONFIG.COMPANY_ADDRESS);
-  els.contactMapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-  els.contactMapIframe.src = `https://www.google.com/maps?q=${encodedAddress}&output=embed`;
+  // Ojo: acá se usa COMPANY_MAP_QUERY (coordenadas), no COMPANY_ADDRESS
+  // (texto) — es lo que evita que aparezcan varias ubicaciones posibles.
+  const encodedQuery = encodeURIComponent(CONFIG.COMPANY_MAP_QUERY);
+  els.contactMapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+  els.contactMapIframe.src = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
 }
 
 /* ------------------------------------------------------------------------
