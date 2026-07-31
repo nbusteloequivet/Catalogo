@@ -38,6 +38,17 @@ const CONFIG = {
 
   COMPANY_ADDRESS: "Reconquista 177, B2814BJE Los Cardales, Provincia de Buenos Aires",
 
+  // Coordenadas EXACTAS para el mapa (latitud,longitud). Usar coordenadas
+  // en vez del texto de la dirección evita que Google Maps muestre varios
+  // resultados posibles en lugar de un único punto.
+  //
+  // Cómo conseguirlas: abrí Google Maps, buscá tu dirección, hacé click
+  // derecho justo sobre el punto exacto del local (no en el resultado de
+  // la búsqueda, sino en el mapa) y elegí la primera opción del menú, que
+  // son las coordenadas (algo como "-34.401234, -58.912345"). Click ahí
+  // para copiarlas, y pegalas acá abajo tal cual, sin espacios.
+  COMPANY_MAP_QUERY: "PEGAR_AQUI_LATITUD,LONGITUD",
+
   // Ruta del logo (usado en el header). Cambiala acá si el archivo
   // cambia de nombre o ubicación.
   LOGO_PATH: "assets/logo-equivet.png",
