@@ -95,7 +95,7 @@ function sendOrder() {
   const body = encodeURIComponent(message);
   window.location.href = `mailto:${CONFIG.ORDER_EMAIL}?subject=${subject}&body=${body}`;
 
-  showCartStatus("Se abrió tu cliente de correo con el pedido cargado. Confirmá el envío desde ahí y después podés vaciar el pedido.", "success");
+  showCartStatus("Se abrió tu cuenta de correo con el pedido cargado. Confirmá el envío desde ahí. Nosotros lo revisaremos y nos contactaremos con usted.", "success");
 }
 
 function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
