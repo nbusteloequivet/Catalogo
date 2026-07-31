@@ -35,10 +35,9 @@ a { color: var(--accent); }
 .site-header {
   background: var(--paper-raised);
   border-bottom: 2px solid var(--ink);
-  position: relative;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  /* Antes tenía "position: sticky; top: 0;" acá — eso hacía que el header
+     quedara pegado a mitad de pantalla al scrollear. Ahora se desplaza
+     con el resto de la página, como pediste. */
 }
 /* Filete fino debajo del borde principal, como una hoja membretada de
    laboratorio — un detalle chico que suma seriedad sin cambiar nada más. */
@@ -53,45 +52,38 @@ a { color: var(--accent); }
 .header-inner {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 34px 28px 20px;
+  padding: 22px 28px;
   display: flex;
   justify-content: center;
   text-align: center;
 }
 
-.brand { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 0; }
 
-/* Emblema: el logo se apoya sobre una placa oscura porque el archivo
-   provisto trae el texto "Veterinaria Equina" en blanco (pensado para
-   fondos oscuros) — así queda legible en vez de perderse contra el
-   fondo blanco de la página. */
+/* Placa oscura eliminada: ahora el logo va directo sobre el fondo de la
+   página. El texto "Veterinaria Equina" del archivo es blanco, así que
+   ya no se va a leer (ver aviso en el chat) — se ve el caballo violeta. */
 .brand-emblem {
-  background: var(--ink);
-  border-radius: 10px;
-  padding: 10px 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;
 }
 .brand-emblem img {
-  height: 62px;
+  height: 170px;
   width: auto;
   display: block;
 }
 
+/* El nombre y el slogan ya no se muestran como texto aparte: quedan
+   representados por el logo agrandado de arriba. Se dejan estas reglas
+   (con display:none) en vez de borrar los elementos del HTML, para no
+   romper el script que les escribe el texto (js/main.js). */
 .brand h1 {
-  font-family: var(--font-display);
-  font-size: 46px;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: -0.01em;
+  display: none;
 }
 
 .brand-sub {
-  margin: 0;
-  font-size: 17px;
-  color: var(--ink-soft);
+  display: none;
 }
 
 .filter-row {
@@ -651,8 +643,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .filter-row { padding: 0 18px 16px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .brand h1 { font-size: 28px; }
-  .brand-emblem img { height: 46px; }
+  .brand-emblem img { height: 110px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 }
