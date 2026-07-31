@@ -638,6 +638,21 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .brand-emblem img { height: 90px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
+
+  /* El selector de cantidad + "Agregar" pasan a ir uno debajo del otro
+     (en vez de lado a lado) porque en 2 columnas cada tarjeta queda
+     angosta y el botón se cortaba. Afecta solo mobile; en desktop siguen
+     lado a lado como siempre. */
+  .card-cart-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .qty-control {
+    justify-content: center;
+  }
+  .add-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 380px) {
