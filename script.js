@@ -27,8 +27,8 @@ const CONFIG = {
 
   // ---- Datos de contacto de la empresa (sección "Contacto" al pie del catálogo) ----
   // Link de Instagram al que se redirige al hacer click.
-  COMPANY_INSTAGRAM_URL: "https://instagram.com/tu_usuario",
-  COMPANY_INSTAGRAM_HANDLE: "@tu_usuario",
+  COMPANY_INSTAGRAM_URL: "https://instagram.com/equivet_arg",
+  COMPANY_INSTAGRAM_HANDLE: "@equivet_arg",
 
   // WhatsApp de la empresa para que el cliente abra el chat directo (esto es
   // distinto del WhatsApp que el cliente carga como su propio dato de contacto).
@@ -41,11 +41,11 @@ const CONFIG = {
   COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
 
   // Horarios laborales, en texto libre.
-  COMPANY_HOURS: "Lunes a viernes de 9 a 18 hs",
+  COMPANY_HOURS: "Lunes a viernes de 9 a 17 hs",
 
   // Dirección física de la empresa. Se usa tanto para mostrarla en texto
   // como para armar el mapa y el link a Google Maps.
-  COMPANY_ADDRESS: "Av. Ejemplo 1234, Buenos Aires, Argentina",
+  COMPANY_ADDRESS: "Reconquista 177, B2814BJE Los Cardales, Provincia de Buenos Aires",
 };
 
 /* Colores para distinguir categorías a simple vista. */
