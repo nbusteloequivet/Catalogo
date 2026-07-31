@@ -57,22 +57,23 @@ a { color: var(--accent); }
   margin-top: 6px;
 }
 .brand-emblem img {
-  height: 150px;
+  height: 230px;
   width: auto;
   display: block;
 }
 
+/* El nombre "EquiVet" ya no se muestra como texto aparte: el logo (más
+   grande ahora) lo representa. Se deja el <h1> oculto en vez de borrarlo
+   del HTML, para no romper js/main.js (que le escribe el texto). */
 .brand h1 {
-  font-family: var(--font-display);
-  font-size: 64px;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: -0.01em;
+  display: none;
 }
 
 .brand-sub {
   margin: 0;
   font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
   color: var(--ink-soft);
 }
 
@@ -633,9 +634,8 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .filter-row { padding: 0 18px 16px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .brand h1 { font-size: 38px; }
   .brand-sub { font-size: 16px; }
-  .brand-emblem img { height: 90px; }
+  .brand-emblem img { height: 140px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 
