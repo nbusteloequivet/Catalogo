@@ -274,6 +274,109 @@ a { color: var(--accent); }
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); font-family: var(--font-mono); font-size: 14px; }
 
+/* ---------- Contacto de la empresa ---------- */
+
+.company-contact {
+  margin-top: 44px;
+  padding-top: 36px;
+  border-top: 2px solid var(--ink);
+}
+
+.company-contact-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  text-align: center;
+}
+
+.company-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  background: var(--paper-raised);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 20px 14px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--line-strong); border-color: var(--accent); }
+.contact-card-static { cursor: default; }
+
+.contact-icon { font-size: 26px; line-height: 1; }
+.contact-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.contact-value {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  word-break: break-word;
+}
+
+.company-map-wrap {
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+
+.company-map-address {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-bottom: 1.5px solid var(--line);
+}
+
+.company-map-link {
+  position: relative;
+  display: block;
+  text-decoration: none;
+}
+
+.company-map-iframe {
+  display: block;
+  width: 100%;
+  height: 280px;
+  border: 0;
+  pointer-events: none; /* los clicks los recibe el <a> que envuelve al iframe */
+}
+
+.company-map-overlay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  box-shadow: 2px 3px 0 var(--line-strong);
+}
+.company-map-link:hover .company-map-overlay { background: var(--accent); }
+
+@media (max-width: 560px) {
+  .company-contact { margin-top: 32px; padding-top: 26px; }
+  .company-map-iframe { height: 220px; }
+}
+
 /* ---------- Footer ---------- */
 
 .site-footer { max-width: 1180px; margin: 0 auto; padding: 20px 28px 90px; color: var(--ink-soft); font-size: 12px; }
