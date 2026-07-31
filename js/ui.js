@@ -4,7 +4,7 @@
    los datos (eso es data.js) ni qué significa "agregar al pedido" (eso es
    cart.js) — solo los muestra y conecta los clicks con esas funciones.
    ========================================================================= */
-
+ 
 /* ------------------------------------------------------------------------
    Búsqueda
    ------------------------------------------------------------------------ */
@@ -19,7 +19,7 @@ function setupSearch() {
     }, 200);
   });
 }
-
+ 
 /* ------------------------------------------------------------------------
    Chips de categoría
    ------------------------------------------------------------------------ */
@@ -27,12 +27,12 @@ function buildCategoryChips() {
   const categories = [...new Set(allProducts.map((p) => p.category))].sort();
   categoryColorMap = {};
   categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
-
+ 
   els.categoryChips.innerHTML = "";
   els.categoryChips.appendChild(makeChip("Todas", null));
   categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c)));
 }
-
+ 
 function makeChip(label, value) {
   const chip = document.createElement("button");
   chip.className = "chip" + (activeCategory === value ? " active" : "");
@@ -45,7 +45,7 @@ function makeChip(label, value) {
   });
   return chip;
 }
-
+ 
 /* ------------------------------------------------------------------------
    Grilla de productos
    ------------------------------------------------------------------------ */
@@ -60,46 +60,46 @@ function renderGrid() {
     }
     return true;
   });
-
+ 
   els.grid.innerHTML = "";
   cartIndicatorEls = {};
-
+ 
   if (filtered.length === 0) {
     els.emptyState.hidden = false;
     return;
   }
   els.emptyState.hidden = true;
-
+ 
   const fragment = document.createDocumentFragment();
   filtered.forEach((p) => fragment.appendChild(buildCard(p)));
   els.grid.appendChild(fragment);
 }
-
+ 
 function availabilityTagHtml(p) {
   const cls = p.availability === "En stock" ? "in" : "out";
   return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
 }
-
+ 
 // Nota: el producto trae "code" (p.code) pero deliberadamente no se
 // renderiza en ningún lado de la tarjeta ni del modal — el cliente no debe
 // verlo en pantalla. Sigue viajando en el mail de la cotización (cart.js).
 function buildCard(p) {
   const key = productKey(p);
-
+ 
   const card = document.createElement("article");
   card.className = "product-card";
-
+ 
   const strip = document.createElement("div");
   strip.className = "card-strip";
   strip.style.background = categoryColorMap[p.category] || CATEGORY_COLORS[0];
   card.appendChild(strip);
-
+ 
   const media = document.createElement("div");
   media.className = "card-media";
   media.appendChild(buildImageEl(p, false));
   media.addEventListener("click", () => openProductModal(p));
   card.appendChild(media);
-
+ 
   const body = document.createElement("div");
   body.className = "card-body";
   body.innerHTML = `
@@ -109,46 +109,46 @@ function buildCard(p) {
     <div class="card-footer">${availabilityTagHtml(p)}</div>
   `;
   body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
-
+ 
   const cartRow = buildCartRow(p, key);
   body.appendChild(cartRow.wrapper);
   card.appendChild(body);
-
+ 
   cartIndicatorEls[key] = cartRow.indicatorEl;
   updateCartIndicator(key);
-
+ 
   return card;
 }
-
+ 
 // Controles de cantidad + botón "Agregar" (reutilizados en tarjeta y modal)
 function buildCartRow(p, key) {
   const wrapper = document.createElement("div");
   wrapper.className = "card-cart-row";
-
+ 
   const qtyControl = document.createElement("div");
   qtyControl.className = "qty-control";
-
+ 
   const minusBtn = document.createElement("button");
   minusBtn.type = "button";
   minusBtn.className = "qty-btn";
   minusBtn.textContent = "−";
   minusBtn.setAttribute("aria-label", "Restar uno");
-
+ 
   const qtyInput = document.createElement("input");
   qtyInput.type = "number";
   qtyInput.className = "qty-input";
   qtyInput.min = "0";
   qtyInput.value = "1";
   qtyInput.setAttribute("aria-label", `Cantidad de ${p.name}`);
-
+ 
   const plusBtn = document.createElement("button");
   plusBtn.type = "button";
   plusBtn.className = "qty-btn";
   plusBtn.textContent = "+";
   plusBtn.setAttribute("aria-label", "Sumar uno");
-
+ 
   const stopBubble = (fn) => (e) => { e.stopPropagation(); fn(e); };
-
+ 
   minusBtn.addEventListener("click", stopBubble(() => {
     qtyInput.value = Math.max(0, safeInt(qtyInput.value) - 1);
   }));
@@ -156,9 +156,9 @@ function buildCartRow(p, key) {
     qtyInput.value = safeInt(qtyInput.value) + 1;
   }));
   qtyInput.addEventListener("click", (e) => e.stopPropagation());
-
+ 
   qtyControl.append(minusBtn, qtyInput, plusBtn);
-
+ 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "add-btn";
@@ -171,20 +171,20 @@ function buildCartRow(p, key) {
       addToCart(p, key, qty);
     }
   }));
-
+ 
   wrapper.append(qtyControl, addBtn);
-
+ 
   const indicatorEl = document.createElement("div");
   indicatorEl.className = "cart-indicator";
   indicatorEl.hidden = true;
-
+ 
   const outer = document.createElement("div");
   outer.appendChild(wrapper);
   outer.appendChild(indicatorEl);
-
+ 
   return { wrapper: outer, indicatorEl };
 }
-
+ 
 function buildImageEl(p, large) {
   if (!p.imageUrl) {
     const placeholder = document.createElement("div");
@@ -204,24 +204,24 @@ function buildImageEl(p, large) {
   };
   return img;
 }
-
+ 
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str ?? "";
   return div.innerHTML;
 }
-
+ 
 /* ------------------------------------------------------------------------
    Modal de detalle de producto
    ------------------------------------------------------------------------ */
 function openProductModal(p) {
   const key = productKey(p);
   els.modalBody.innerHTML = "";
-
+ 
   const media = document.createElement("div");
   media.className = "modal-media";
   media.appendChild(buildImageEl(p, true));
-
+ 
   const info = document.createElement("div");
   info.className = "modal-info";
   info.innerHTML = `
@@ -232,20 +232,20 @@ function openProductModal(p) {
     ${p.lab ? `<div class="modal-row"><span class="k">Laboratorio</span><span>${escapeHtml(p.lab)}</span></div>` : ""}
     ${p.description ? `<p class="modal-desc">${escapeHtml(p.description)}</p>` : ""}
   `;
-
+ 
   const cartRow = buildCartRow(p, key);
   cartRow.wrapper.querySelector(".card-cart-row").classList.add("modal-cart-row");
   info.appendChild(cartRow.wrapper);
-
+ 
   els.modalBody.appendChild(media);
   els.modalBody.appendChild(info);
-
+ 
   cartIndicatorEls[key] = cartRow.indicatorEl;
   updateCartIndicator(key);
-
+ 
   openModalEl(els.productModal);
 }
-
+ 
 /* ------------------------------------------------------------------------
    Apertura / cierre genérico de modales
    ------------------------------------------------------------------------ */
@@ -260,7 +260,7 @@ function closeModalEl(modalEl) {
   }
   if (modalEl === els.productModal) renderGrid();
 }
-
+ 
 function setupModalClosers() {
   document.querySelectorAll("[data-close-modal]").forEach((btn) => {
     btn.addEventListener("click", () => closeModalEl(document.getElementById(btn.dataset.closeModal)));
@@ -276,7 +276,7 @@ function setupModalClosers() {
     else if (!els.productModal.hidden) closeModalEl(els.productModal);
   });
 }
-
+ 
 /* ------------------------------------------------------------------------
    Modal / botón del carrito
    ------------------------------------------------------------------------ */
@@ -285,20 +285,20 @@ function setupCartModal() {
     renderCartModal();
     openModalEl(els.cartModal);
   });
-
+ 
   els.clearCartBtn.addEventListener("click", () => {
     clearCart();
     showCartStatus("Vaciaste tu pedido.", "success");
   });
-
+ 
   els.sendEmailBtn.addEventListener("click", sendOrder);
 }
-
+ 
 function renderCartModal() {
   const items = Object.entries(cart);
   els.cartItemsEl.innerHTML = "";
   els.cartEmptyEl.hidden = items.length > 0;
-
+ 
   items.forEach(([key, entry]) => {
     const row = document.createElement("div");
     row.className = "cart-item";
@@ -311,7 +311,7 @@ function renderCartModal() {
         <div class="cart-item-meta">${escapeHtml(metaText)}</div>
       </div>
     `;
-
+ 
     const qtyInput = document.createElement("input");
     qtyInput.type = "number";
     qtyInput.min = "0";
@@ -327,20 +327,20 @@ function renderCartModal() {
         updateCartIndicator(key);
       }
     });
-
+ 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.className = "cart-item-remove";
     removeBtn.textContent = "✕";
     removeBtn.setAttribute("aria-label", `Quitar ${entry.product.name}`);
     removeBtn.addEventListener("click", () => removeFromCart(key));
-
+ 
     row.appendChild(qtyInput);
     row.appendChild(removeBtn);
     els.cartItemsEl.appendChild(row);
   });
 }
-
+ 
 function showCartStatus(msg, type) {
   els.cartStatus.hidden = false;
   els.cartStatus.textContent = msg;
@@ -349,7 +349,7 @@ function showCartStatus(msg, type) {
 function hideCartStatus() {
   els.cartStatus.hidden = true;
 }
-
+ 
 /* ------------------------------------------------------------------------
    Botón "Contacto": baja a la sección de contacto al final de la página.
    ------------------------------------------------------------------------ */
@@ -358,22 +358,22 @@ function setupContactFab() {
     els.contactSection.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
-
+ 
 /* ------------------------------------------------------------------------
    Contacto de la empresa (Instagram, WhatsApp, email, horarios y mapa)
    ------------------------------------------------------------------------ */
 function setupCompanyContact() {
   els.contactInstagram.href = CONFIG.COMPANY_INSTAGRAM_URL;
   els.contactInstagramValue.textContent = CONFIG.COMPANY_INSTAGRAM_HANDLE;
-
+ 
   els.contactWhatsapp.href = `https://wa.me/${CONFIG.COMPANY_WHATSAPP_NUMBER}`;
   els.contactWhatsappValue.textContent = CONFIG.COMPANY_WHATSAPP_DISPLAY;
-
+ 
   els.contactGmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}&su=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}`;
   els.contactGmailValue.textContent = CONFIG.COMPANY_EMAIL;
-
+ 
   els.contactHoursValue.textContent = CONFIG.COMPANY_HOURS;
-
+ 
   els.contactAddressValue.textContent = CONFIG.COMPANY_ADDRESS;
   // Ojo: acá se usa COMPANY_MAP_QUERY (coordenadas), no COMPANY_ADDRESS
   // (texto) — es lo que evita que aparezcan varias ubicaciones posibles.
@@ -381,7 +381,7 @@ function setupCompanyContact() {
   els.contactMapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
   els.contactMapIframe.src = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
 }
-
+ 
 /* ------------------------------------------------------------------------
    Banner de estado del catálogo
    ------------------------------------------------------------------------ */
@@ -393,3 +393,4 @@ function showStatus(msg, type) {
 function hideStatus() {
   els.statusBanner.hidden = true;
 }
+ 
