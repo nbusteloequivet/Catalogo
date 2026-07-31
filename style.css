@@ -64,7 +64,7 @@ a { color: var(--accent); }
 
 .brand h1 {
   font-family: var(--font-display);
-  font-size: 46px;
+  font-size: 64px;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
@@ -72,7 +72,7 @@ a { color: var(--accent); }
 
 .brand-sub {
   margin: 0;
-  font-size: 17px;
+  font-size: 22px;
   color: var(--ink-soft);
 }
 
@@ -633,7 +633,8 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .filter-row { padding: 0 18px 16px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .brand h1 { font-size: 28px; }
+  .brand h1 { font-size: 38px; }
+  .brand-sub { font-size: 16px; }
   .brand-emblem img { height: 90px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
