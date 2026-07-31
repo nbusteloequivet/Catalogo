@@ -7,37 +7,37 @@
 const CONFIG = {
   // URL del CSV publicado (Archivo > Compartir > Publicar en la Web > CSV)
   SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQC4BFXcTT1kYiQALcRtU2X4EkKqAbXc1tf0hfLzsaZbofK_AaDVn6X6Nj9Vlx-6ld484FGk1VHG1Y2/pub?gid=0&single=true&output=csv",
- 
+
   // Nombre y bajada que se muestran arriba de todo, centrados
   LAB_NAME: "EquiVet",
-  LAB_SUBTITLE: "Trabajando por el bienestar animal",
- 
+  LAB_SUBTITLE: "Especialistas en reproducción",
+
   // Cada cuánto se vuelve a consultar la planilla sola, en milisegundos
   AUTO_REFRESH_MS: 30000,
- 
+
   // Ancho de imagen que se le pide a Drive
   IMAGE_WIDTH: 500,
- 
+
   // ---- Datos de destino del pedido: A DÓNDE TE LLEGA A VOS ----
   ORDER_EMAIL: "nbustelo.equivet@gmail.com",
- 
+
   // Asunto FIJO para todos los mails de cotización (para poder filtrarlos
   // y agruparlos en tu casilla).
   ORDER_EMAIL_SUBJECT: "Pedido de cotización - EquiVet",
- 
+
   // ---- Datos de contacto de la empresa (sección "Contacto" al pie) ----
   COMPANY_INSTAGRAM_URL: "https://instagram.com/equivet_arg",
   COMPANY_INSTAGRAM_HANDLE: "@equivet_arg",
- 
+
   COMPANY_WHATSAPP_NUMBER: "5491140780872",
   COMPANY_WHATSAPP_DISPLAY: "+54 9 11 4078-0872",
- 
+
   COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
- 
+
   COMPANY_HOURS: "Lunes a viernes de 9 a 17 hs",
- 
+
   COMPANY_ADDRESS: "Reconquista 177, B2814BJE Los Cardales, Provincia de Buenos Aires",
- 
+
   // Coordenadas EXACTAS para el mapa (latitud,longitud). Usar coordenadas
   // en vez del texto de la dirección evita que Google Maps muestre varios
   // resultados posibles en lugar de un único punto.
@@ -47,19 +47,19 @@ const CONFIG = {
   // la búsqueda, sino en el mapa) y elegí la primera opción del menú, que
   // son las coordenadas (algo como "-34.401234, -58.912345"). Click ahí
   // para copiarlas, y pegalas acá abajo tal cual, sin espacios.
-  COMPANY_MAP_QUERY: "-34.34038523222153, -58.993749532664765",
- 
+  COMPANY_MAP_QUERY: "PEGAR_AQUI_LATITUD,LONGITUD",
+
   // Ruta del logo (usado en el header). Cambiala acá si el archivo
   // cambia de nombre o ubicación.
   LOGO_PATH: "assets/logo-equivet.png",
 };
- 
+
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
 const CATEGORY_COLORS = [
   "#b200ff", "#000000", "#ff2ecb", "#00b3c6", "#ff7a00",
   "#00a651", "#ffcc00", "#e63946", "#3a5cff", "#8c52ff",
 ];
- 
+
 /* Columnas que el programa busca en la planilla (sin importar mayúsculas
    ni tildes, ver normalizeHeader en data.js). El precio, moneda e IVA se
    siguen leyendo por si los necesitás el día de mañana (por ejemplo, para
