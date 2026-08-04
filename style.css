@@ -57,12 +57,9 @@ a { color: var(--accent); }
   margin-top: 6px;
 }
 .brand-emblem img {
-  /* El archivo actual mide apenas 140×103px de origen. Mostrarlo mucho
-     más grande que eso es lo que lo vuelve borroso — no hay más detalle
-     en la imagen para agrandar. Este tamaño queda cerca de su resolución
-     real. Si conseguís un archivo de mayor resolución (o vectorial),
-     subir este número de vuelta es seguro. */
-  height: 105px;
+  /* Ahora es un .svg (vectorial): se puede mostrar grande sin perder
+     nitidez, a diferencia del .png viejo de 140×103px. */
+  height: 230px;
   width: auto;
   display: block;
 }
@@ -672,7 +669,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
-  .brand-emblem img { height: 90px; }
+  .brand-emblem img { height: 140px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 
