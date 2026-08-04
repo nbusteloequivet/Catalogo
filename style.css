@@ -57,7 +57,12 @@ a { color: var(--accent); }
   margin-top: 6px;
 }
 .brand-emblem img {
-  height: 230px;
+  /* El archivo actual mide apenas 140×103px de origen. Mostrarlo mucho
+     más grande que eso es lo que lo vuelve borroso — no hay más detalle
+     en la imagen para agrandar. Este tamaño queda cerca de su resolución
+     real. Si conseguís un archivo de mayor resolución (o vectorial),
+     subir este número de vuelta es seguro. */
+  height: 105px;
   width: auto;
   display: block;
 }
@@ -182,7 +187,12 @@ a { color: var(--accent); }
 }
 
 .card-media {
-  aspect-ratio: 4 / 3;
+  /* Antes era 4:3. Al pasar a 5 columnas cada tarjeta quedó más angosta,
+     y como esta caja escala en proporción al ancho, la imagen se achicó
+     de rebote. Un cuadrado (1:1) le devuelve tamaño a la imagen sin tocar
+     el ancho de la tarjeta ni la alineación de abajo — la tarjeta
+     simplemente queda un poco más alta, que es lo que se pidió. */
+  aspect-ratio: 1 / 1;
   background: var(--paper);
   display: flex;
   align-items: center;
@@ -662,7 +672,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
-  .brand-emblem img { height: 140px; }
+  .brand-emblem img { height: 90px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 
