@@ -47,7 +47,7 @@ const CONFIG = {
   // la búsqueda, sino en el mapa) y elegí la primera opción del menú, que
   // son las coordenadas (algo como "-34.401234, -58.912345"). Click ahí
   // para copiarlas, y pegalas acá abajo tal cual, sin espacios.
-  COMPANY_MAP_QUERY: "PEGAR_AQUI_LATITUD,LONGITUD",
+  COMPANY_MAP_QUERY: "-34.34031436171752, -58.993835363352446",
 
   // Ruta del logo (usado en el header). Cambiala acá si el archivo
   // cambia de nombre o ubicación.
