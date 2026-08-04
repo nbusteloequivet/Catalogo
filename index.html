@@ -3,7 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pedidos — Laboratorio</title>
+
+<title>EquiVet — Laboratorio de Reproducción Equina en Los Cardales, Buenos Aires</title>
+<meta name="description" content="EquiVet es un laboratorio especializado en reproducción equina en Los Cardales, Buenos Aires. Consultá nuestro catálogo de productos y pedí tu cotización online.">
+<link rel="canonical" href="https://nbusteloequivet.github.io/Catalogo/">
+
+<!-- Open Graph: cómo se ve el link al compartirlo en WhatsApp, Instagram, etc. -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_AR">
+<meta property="og:title" content="EquiVet — Laboratorio de Reproducción Equina">
+<meta property="og:description" content="Catálogo de productos y pedidos de cotización de EquiVet, laboratorio de reproducción equina en Los Cardales, Buenos Aires.">
+<meta property="og:url" content="https://nbusteloequivet.github.io/Catalogo/">
+<meta property="og:image" content="https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.png">
+
+<!-- Datos estructurados: le dicen a Google explícitamente qué es la
+     empresa, dónde está y cómo contactarla (nombre, dirección, teléfono,
+     horarios, redes). Esto es lo que puede hacer que aparezcan la
+     dirección/teléfono directo en el resultado de búsqueda. NO garantiza
+     una posición — ver la explicación en el chat. Si cambiás estos datos
+     en js/config.js más adelante, actualizalos también acá para que no
+     queden desincronizados. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VeterinaryCare",
+  "name": "EquiVet",
+  "description": "Laboratorio especializado en reproducción equina.",
+  "image": "https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.png",
+  "url": "https://nbusteloequivet.github.io/Catalogo/",
+  "telephone": "+5491140780872",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Reconquista 177",
+    "addressLocality": "Los Cardales",
+    "addressRegion": "Buenos Aires",
+    "postalCode": "B2814BJE",
+    "addressCountry": "AR"
+  },
+  "openingHours": "Mo-Fr 09:00-17:00",
+  "sameAs": [
+    "https://instagram.com/equivet_arg"
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,8 +57,7 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="brand">
-      <h1 id="lab-name">Catálogo de Productos</h1>
-      <p class="brand-sub" id="lab-sub">Armá tu pedido y te contactamos para coordinarlo</p>
+      <h1 id="lab-name">EquiVet — Laboratorio de Reproducción Equina, Los Cardales</h1>
       <!-- Nota: el archivo del logo tiene el texto "Veterinaria Equina" en
            blanco (pensado para fondo oscuro), así que sobre el fondo
            blanco de la página ese texto no se llega a leer — se ve el
@@ -24,6 +66,7 @@
       <span class="brand-emblem">
         <img id="brand-logo" src="" alt="Logo EquiVet">
       </span>
+      <p class="brand-sub" id="lab-sub">Armá tu pedido y te contactamos para coordinarlo</p>
     </div>
   </div>
 
