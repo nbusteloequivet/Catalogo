@@ -62,19 +62,30 @@ a { color: var(--accent); }
   display: block;
 }
 
-/* El nombre "EquiVet" ya no se muestra como texto aparte: el logo (más
-   grande ahora) lo representa. Se deja el <h1> oculto en vez de borrarlo
-   del HTML, para no romper js/main.js (que le escribe el texto). */
+/* El nombre no se muestra como texto grande aparte: el logo lo representa
+   visualmente. Pero en vez de "display: none" (que un buscador puede
+   llegar a leer como contenido oculto/sospechoso si se abusa de la
+   técnica) usamos esta técnica estándar: el texto sigue estando en la
+   página para Google y lectores de pantalla, solo que recortado a 1px y
+   fuera del área visible — no se ve, pero cuenta como contenido real. */
 .brand h1 {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .brand-sub {
-  margin: 0;
+  margin: 10px 0 0;
   font-size: 22px;
   font-weight: 700;
   font-style: italic;
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .filter-row {
@@ -196,7 +207,22 @@ a { color: var(--accent); }
   flex: 1;
 }
 
-.card-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0 0 4px; line-height: 1.25; }
+.card-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  line-height: 1.25;
+  /* Alto fijo de 2 renglones (17px × 1.25 × 2) para que un nombre corto
+     (1 renglón) y uno largo (2 renglones) dejen la misma altura reservada
+     — así todo lo que va debajo (categoría, disponibilidad, "Agregar")
+     queda siempre a la misma línea entre tarjetas. */
+  min-height: 43px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .card-category { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
 .card-subcategory { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); opacity: 0.8; }
 
