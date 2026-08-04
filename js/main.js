@@ -8,7 +8,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
 
-  els.labName.textContent = CONFIG.LAB_NAME;
+  // El <h1> ya no se sincroniza con CONFIG.LAB_NAME: se dejó un texto fijo
+  // y más descriptivo en index.html a propósito, para SEO (no se ve en
+  // pantalla, pero sí lo leen los buscadores). El slogan sí sigue siendo
+  // configurable acá porque ese sí se ve.
   els.labSub.textContent = CONFIG.LAB_SUBTITLE;
   els.logoImg.src = CONFIG.LOGO_PATH;
 
