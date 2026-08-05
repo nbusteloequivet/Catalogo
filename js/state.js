@@ -35,6 +35,8 @@ function cacheElements() {
   els.searchInput = document.getElementById("search-input");
   els.categoryChips = document.getElementById("category-chips");
   els.labChips = document.getElementById("lab-chips");
+  els.categoryToggle = document.getElementById("category-toggle");
+  els.labToggle = document.getElementById("lab-toggle");
   els.labName = document.getElementById("lab-name");
   els.labSub = document.getElementById("lab-sub");
   els.logoImg = document.getElementById("brand-logo");
