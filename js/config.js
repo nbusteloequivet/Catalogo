@@ -49,9 +49,12 @@ const CONFIG = {
   // para copiarlas, y pegalas acá abajo tal cual, sin espacios.
   COMPANY_MAP_QUERY: "-34.34031436171752,-58.993835363352446",
 
-  // Ruta del logo (usado en el header). Ahora es un .svg (vectorial) en
-  // vez del .png viejo, así que no pierde nitidez sin importar el tamaño.
-  LOGO_PATH: "assets/logo-equivet.svg",
+  // Ruta del logo (usado en el header). Acepta .png, .jpg o .svg — el
+  // navegador lo muestra igual, solo cambiá el nombre de archivo acá si
+  // el logo cambia. Actualmente es un archivo .png/.jpg (raster): si es
+  // de baja resolución, agrandarlo mucho en style.css lo va a ver
+  // borroso — ver la nota en .brand-emblem img dentro de style.css.
+  LOGO_PATH: "assets/logo-equivet.png",
 };
 
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
