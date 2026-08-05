@@ -291,7 +291,7 @@ function setupCartModal() {
     showCartStatus("Vaciaste tu pedido.", "success");
   });
  
-  els.sendEmailBtn.addEventListener("click", sendOrder);
+  els.sendGmailBtn.addEventListener("click", openGmailCompose);
 }
  
 function renderCartModal() {
@@ -393,4 +393,3 @@ function showStatus(msg, type) {
 function hideStatus() {
   els.statusBanner.hidden = true;
 }
- 
