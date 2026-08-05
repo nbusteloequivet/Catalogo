@@ -107,6 +107,13 @@ function prepareOrder() {
   return message;
 }
 
+function isAndroidDevice() {
+  return /android/i.test(navigator.userAgent);
+}
+function isMobileDevice() {
+  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
 function openGmailCompose() {
   const message = prepareOrder();
   if (message === null) return;
@@ -115,10 +122,32 @@ function openGmailCompose() {
   const subject = encodeURIComponent(CONFIG.ORDER_EMAIL_SUBJECT);
   const body = encodeURIComponent(message);
 
-  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+  // Link "de siempre": funciona bien en PC y en iPhone (ahí, si tiene la
+  // app de Gmail, Safari la ofrece igual con el texto cargado).
+  const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
 
-  window.open(url, "_blank", "noopener,noreferrer");
-  showCartStatus("Se abrió Gmail en una pestaña nueva, con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
+  if (isAndroidDevice()) {
+    // En Android, un link común a mail.google.com muchas veces abre la
+    // app de Gmail pero en la bandeja de entrada, sin el mail redactado.
+    // Este "intent" le pide explícitamente a Android que use la app de
+    // Gmail (package com.google.android.gm) para componer el mail, y si
+    // no la tiene instalada, S.browser_fallback_url hace que caiga sola
+    // al link de arriba en el navegador.
+    const intentUrl =
+      `intent://send?to=${to}&subject=${subject}&body=${body}` +
+      `#Intent;scheme=mailto;package=com.google.android.gm;` +
+      `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
+    window.location.href = intentUrl;
+  } else if (isMobileDevice()) {
+    // iPhone: una navegación directa es más confiable que abrir una
+    // pestaña nueva para que el sistema ofrezca la app correctamente.
+    window.location.href = webUrl;
+  } else {
+    // PC: pestaña nueva, así no se pierde el catálogo de fondo.
+    window.open(webUrl, "_blank", "noopener,noreferrer");
+  }
+
+  showCartStatus("Se abrió Gmail con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
 }
 
 function buildOrderMessage({ nombre, apellido, whatsapp, items }) {
