@@ -13,6 +13,7 @@ let allProducts = [];
 // Filtros activos de la grilla
 let activeCategory = null;
 let activeLab = null;
+let activeSubcategory = null;
 let searchTerm = "";
 
 // Color asignado a cada categoría (se arma en ui.js, buildCategoryChips)
@@ -34,6 +35,7 @@ function cacheElements() {
   els.emptyState = document.getElementById("empty-state");
   els.searchInput = document.getElementById("search-input");
   els.categoryChips = document.getElementById("category-chips");
+  els.subcategoryChips = document.getElementById("subcategory-chips");
   els.labChips = document.getElementById("lab-chips");
   els.categoryToggle = document.getElementById("category-toggle");
   els.labToggle = document.getElementById("lab-toggle");
