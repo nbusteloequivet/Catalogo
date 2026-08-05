@@ -171,6 +171,11 @@ a { color: var(--accent); }
   display: none;
 }
 
+.subcategory-chips {
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+}
+
 .chip {
   font-family: var(--font-mono);
   font-size: 12px;
