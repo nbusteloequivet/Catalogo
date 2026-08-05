@@ -61,7 +61,7 @@ a { color: var(--accent); }
      resolución (140×103px original), a este tamaño puede notarse
      borroso — si es así, es el archivo, no este número; ver charla
      anterior sobre reemplazarlo por uno de mayor resolución o vectorial. */
-  height: 240px;
+  height: 300px;
   width: auto;
   display: block;
 }
