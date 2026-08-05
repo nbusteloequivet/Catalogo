@@ -32,11 +32,53 @@ function buildCategoryChips() {
   els.categoryChips.appendChild(makeChip("Todas", null, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
+    updateSubcategoryChips(value);
     renderGrid();
   }));
   categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
+    updateSubcategoryChips(value);
+    renderGrid();
+  })));
+}
+
+// Se llama cada vez que se elige una categoría (o "Todas"). Si esa
+// categoría tiene más de una subcategoría entre los productos cargados,
+// arma y muestra su panel de subcategorías (mismo estilo de chip); si no
+// tiene, o se eligió "Todas", oculta ese panel.
+function updateSubcategoryChips(category) {
+  const subcats = category
+    ? [...new Set(allProducts.filter((p) => p.category === category).map((p) => p.subcategory).filter(Boolean))].sort()
+    : [];
+
+  if (subcats.length === 0) {
+    activeSubcategory = null;
+    els.subcategoryChips.innerHTML = "";
+    els.subcategoryChips.hidden = true;
+    return;
+  }
+
+  // Si veníamos filtrando por una subcategoría que no pertenece a la
+  // categoría recién elegida, se descarta.
+  if (activeSubcategory && !subcats.includes(activeSubcategory)) {
+    activeSubcategory = null;
+  }
+
+  renderSubcategoryChips(subcats);
+  els.subcategoryChips.hidden = false;
+}
+
+function renderSubcategoryChips(subcats) {
+  els.subcategoryChips.innerHTML = "";
+  els.subcategoryChips.appendChild(makeChip("Todas", null, activeSubcategory, (value) => {
+    activeSubcategory = value;
+    renderSubcategoryChips(subcats);
+    renderGrid();
+  }));
+  subcats.forEach((s) => els.subcategoryChips.appendChild(makeChip(s, s, activeSubcategory, (value) => {
+    activeSubcategory = value;
+    renderSubcategoryChips(subcats);
     renderGrid();
   })));
 }
@@ -82,6 +124,15 @@ function makeChip(label, value, activeValue, onSelect) {
 function setupFilterToggles() {
   setupFilterToggle(els.categoryToggle, els.categoryChips);
   setupFilterToggle(els.labToggle, els.labChips);
+
+  // Al cerrar "Categorías", si había un panel de subcategorías abierto
+  // (anidado adentro), se oculta también — el filtro elegido se mantiene,
+  // solo deja de verse hasta que se vuelva a abrir "Categorías".
+  els.categoryToggle.addEventListener("click", () => {
+    if (els.categoryToggle.getAttribute("aria-expanded") !== "true") {
+      els.subcategoryChips.hidden = true;
+    }
+  });
 }
 
 function setupFilterToggle(toggleBtn, panelEl) {
@@ -107,6 +158,7 @@ function closeFilterPanel(toggleBtn, panelEl) {
 function renderGrid() {
   const filtered = allProducts.filter((p) => {
     if (activeCategory && p.category !== activeCategory) return false;
+    if (activeSubcategory && p.subcategory !== activeSubcategory) return false;
     if (activeLab && p.lab !== activeLab) return false;
     if (searchTerm) {
       // El código sigue siendo buscable (útil si alguien lo tipea de
