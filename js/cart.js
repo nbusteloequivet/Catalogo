@@ -83,8 +83,7 @@ function clearCart() {
    ------------------------------------------------------------------------ */
 
 // Valida el formulario y arma el mensaje. Si falta algo, muestra el error
-// y devuelve null — así las 4 acciones (Gmail/Outlook/Yahoo/Copiar)
-// comparten exactamente la misma validación.
+// y devuelve null.
 function prepareOrder() {
   hideCartStatus();
 
@@ -92,7 +91,6 @@ function prepareOrder() {
   const nombre = els.cartNombre.value.trim();
   const apellido = els.cartApellido.value.trim();
   const whatsapp = els.cartWhatsapp.value.trim();
-  const email = els.cartEmail.value.trim();
 
   if (items.length === 0) {
     showCartStatus("Todavía no agregaste ningún producto al pedido.", "error");
@@ -102,12 +100,10 @@ function prepareOrder() {
     showCartStatus("Completá tus datos antes de enviar.", "error");
     return null;
   }
-  if (!whatsapp && !email) {
-    showCartStatus("Dejanos un WhatsApp o un Email de contacto.", "error");
-    return null;
-  }
+  // El WhatsApp es opcional: el email de contacto ya llega solo, como
+  // remitente del mail que el cliente termina enviando desde su Gmail.
 
-  const message = buildOrderMessage({ nombre, apellido, whatsapp, email, items });
+  const message = buildOrderMessage({ nombre, apellido, whatsapp, items });
   return message;
 }
 
@@ -125,13 +121,12 @@ function openGmailCompose() {
   showCartStatus("Se abrió Gmail en una pestaña nueva, con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
 }
 
-function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
+function buildOrderMessage({ nombre, apellido, whatsapp, items }) {
   const lines = [];
   lines.push(`Pedido - ${CONFIG.LAB_NAME}`);
   lines.push("");
   lines.push(`Cliente: ${nombre} ${apellido}`);
   if (whatsapp) lines.push(`WhatsApp: ${whatsapp}`);
-  if (email) lines.push(`Email: ${email}`);
   lines.push("");
   lines.push("Productos:");
   items.forEach(({ product, qty }) => {
