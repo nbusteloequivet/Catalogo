@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   els.logoImg.src = CONFIG.LOGO_PATH;
 
   setupSearch();
+  setupFilterToggles();
   setupModalClosers();
   setupCartModal();
   setupContactFab();
