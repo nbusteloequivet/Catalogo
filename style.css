@@ -120,7 +120,7 @@ a { color: var(--accent); }
    arranca oculto. */
 .filter-toggles {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
 }
 .filter-group {
