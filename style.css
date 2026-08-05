@@ -59,7 +59,7 @@ a { color: var(--accent); }
 .brand-emblem img {
   /* Ahora es un .svg (vectorial): se puede mostrar grande sin perder
      nitidez, a diferencia del .png viejo de 140×103px. */
-  height: 320px;
+  height: 230px;
   width: auto;
   display: block;
 }
@@ -86,6 +86,7 @@ a { color: var(--accent); }
   margin: 10px 0 0;
   font-size: 22px;
   font-weight: 700;
+  font-style: italic;
   color: var(--ink);
 }
 
@@ -644,6 +645,24 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 .cart-status.error { border-color: var(--ink); color: var(--ink); }
 .cart-status.success { border-color: var(--accent); color: var(--accent); }
 
+.cart-send {
+  border-top: 1.5px solid var(--ink);
+  padding-top: 16px;
+}
+.btn-provider {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.btn-provider:hover { background: var(--accent); border-color: var(--accent); }
+
 .cart-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn-primary, .btn-secondary {
   flex: 1 1 150px;
@@ -668,7 +687,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
-  .brand-emblem img { height: 230px; }
+  .brand-emblem img { height: 140px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 
