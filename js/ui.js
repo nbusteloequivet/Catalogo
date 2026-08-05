@@ -1,234 +1,503 @@
 /* =========================================================================
-   CART.JS — Lógica del pedido (el "carrito").
-
-   Este archivo hace DOS cosas cuando el cliente envía un presupuesto:
-   1) Arma un mail y abre Gmail con todo cargado (como hasta ahora).
-   2) Manda una copia estructurada de esos mismos datos a una planilla de
-      Google ("Pedidos"), para ir armando de a poco una base de datos que
-      después sirva para ver qué se vende más, controlar stock, etc.
-
-   La parte 2 es siempre "best effort": si por lo que sea falla (Google
-   caído, sin internet un instante, lo que sea), el mail se manda igual —
-   nunca deben depender una de la otra. El registro en la base es un
-   extra silencioso, no un requisito para que el pedido llegue.
+   UI.JS — Todo lo que dibuja cosas en pantalla: grilla, tarjetas, modales,
+   chips de categoría y la sección de contacto. No decide de dónde salen
+   los datos (eso es data.js) ni qué significa "agregar al pedido" (eso es
+   cart.js) — solo los muestra y conecta los clicks con esas funciones.
    ========================================================================= */
-
-function safeInt(value) {
-  const n = parseInt(value, 10);
-  return isNaN(n) || n < 0 ? 0 : n;
-}
-
-function addToCart(product, key, qty) {
-  cart[key] = { product, qty };
-  updateCartIndicator(key);
-  updateCartFabCount();
-}
-
-function removeFromCart(key) {
-  delete cart[key];
-  updateCartIndicator(key);
-  updateCartFabCount();
-  renderCartModal();
-}
-
-function updateCartIndicator(key) {
-  const el = cartIndicatorEls[key];
-  if (!el) return;
-  const entry = cart[key];
-  if (entry && entry.qty > 0) {
-    el.hidden = false;
-    el.textContent = `En tu pedido: ${entry.qty}`;
-  } else {
-    el.hidden = true;
-    el.textContent = "";
-  }
-}
-
-function updateCartFabCount() {
-  const distinctItems = Object.keys(cart).length;
-  els.cartCount.hidden = distinctItems === 0;
-  els.cartCount.textContent = String(distinctItems);
-}
-
-function clearCart() {
-  cart = {};
-  Object.keys(cartIndicatorEls).forEach(updateCartIndicator);
-  updateCartFabCount();
-  renderCartModal();
-}
-
+ 
 /* ------------------------------------------------------------------------
-   Envío de la cotización — sin backend propio, pero SIN depender de que
-   la computadora tenga un programa de mail instalado (mailto: requiere
-   eso, y hoy casi nadie lo tiene). En cambio, se abre directamente la
-   ventana de redactar de Gmail (en el navegador, o la app si el sistema
-   la abre sola — ver detalle más abajo), con destinatario, asunto y
-   cuerpo ya completos. No hace falta copiar ni pegar nada.
-
-   El asunto es SIEMPRE el mismo (CONFIG.ORDER_EMAIL_SUBJECT), así en tu
-   casilla podés agrupar/filtrar todas las cotizaciones juntas. Aclaración
-   honesta: como el cliente termina en una ventana de redacción real,
-   técnicamente podría cambiar el asunto antes de tocar enviar — no hay
-   forma de impedirlo del todo sin un servidor propio que mande el mail
-   por vos —, pero por defecto le va a llegar siempre así.
-
-   El código de producto (product.code) NO se muestra en ningún lado de la
-   página, pero sí viaja en el mail y en el registro de la base de datos —
-   es la única vía por la que llega a vos.
+   Búsqueda
    ------------------------------------------------------------------------ */
-
-// Valida el formulario y arma todos los datos del pedido en un solo
-// objeto. Si falta algo, muestra el error y devuelve null. Tanto el
-// envío del mail como el registro en la base de datos parten de acá, así
-// los dos usan siempre exactamente los mismos datos.
-function prepareOrder() {
-  hideCartStatus();
-
-  const items = Object.values(cart);
-  const nombre = els.cartNombre.value.trim();
-  const apellido = els.cartApellido.value.trim();
-  const whatsapp = els.cartWhatsapp.value.trim();
-  const email = els.cartEmail.value.trim();
-
-  if (items.length === 0) {
-    showCartStatus("Todavía no agregaste ningún producto al pedido.", "error");
-    return null;
-  }
-  if (!nombre || !apellido) {
-    showCartStatus("Completá tus datos antes de enviar.", "error");
-    return null;
-  }
-  // WhatsApp y Email son opcionales — no bloquean el envío.
-
-  // ID simple para poder agrupar en la planilla todas las filas que
-  // pertenecen a este mismo pedido (un timestamp alcanza: es único y
-  // además queda ordenable cronológicamente sin ningún esfuerzo extra).
-  const orderId = String(Date.now());
-
-  const message = buildOrderMessage({ nombre, apellido, whatsapp, email, items });
-
-  return { orderId, nombre, apellido, whatsapp, email, items, message };
-}
-
-function isAndroidDevice() {
-  return /android/i.test(navigator.userAgent);
-}
-function isMobileDevice() {
-  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-function openGmailCompose() {
-  const order = prepareOrder();
-  if (order === null) return;
-
-  const to = encodeURIComponent(CONFIG.ORDER_EMAIL);
-  const subject = encodeURIComponent(CONFIG.ORDER_EMAIL_SUBJECT);
-  const body = encodeURIComponent(order.message);
-
-  // Link "de siempre": funciona bien en PC y en iPhone (ahí, si tiene la
-  // app de Gmail, Safari la ofrece igual con el texto cargado).
-  const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
-
-  if (isAndroidDevice()) {
-    // En Android, un link común a mail.google.com muchas veces abre la
-    // app de Gmail pero en la bandeja de entrada, sin el mail redactado.
-    // Este "intent" le pide explícitamente a Android que use la app de
-    // Gmail (package com.google.android.gm) para componer el mail, y si
-    // no la tiene instalada, S.browser_fallback_url hace que caiga sola
-    // al link de arriba en el navegador.
-    const intentUrl =
-      `intent://send?to=${to}&subject=${subject}&body=${body}` +
-      `#Intent;scheme=mailto;package=com.google.android.gm;` +
-      `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
-    window.location.href = intentUrl;
-  } else if (isMobileDevice()) {
-    // iPhone: una navegación directa es más confiable que abrir una
-    // pestaña nueva para que el sistema ofrezca la app correctamente.
-    window.location.href = webUrl;
-  } else {
-    // PC: pestaña nueva, así no se pierde el catálogo de fondo.
-    window.open(webUrl, "_blank", "noopener,noreferrer");
-  }
-
-  showCartStatus("Se abrió Gmail con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
-
-  // Registro en la base de datos: siempre en paralelo, nunca bloquea ni
-  // condiciona lo de arriba (ver logOrderToDatabase).
-  logOrderToDatabase(order);
-}
-
-function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
-  const lines = [];
-  lines.push(`Pedido - ${CONFIG.LAB_NAME}`);
-  lines.push("");
-  lines.push(`Cliente: ${nombre} ${apellido}`);
-  if (whatsapp) lines.push(`WhatsApp: ${whatsapp}`);
-  if (email) lines.push(`Email: ${email}`);
-  lines.push("");
-  lines.push("Productos:");
-  items.forEach(({ product, qty }) => {
-    // El código sí va en el mail, aunque nunca se muestre en pantalla.
-    const codePart = product.code ? ` (${product.code})` : "";
-    lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
+function setupSearch() {
+  let debounceTimer;
+  els.searchInput.addEventListener("input", (e) => {
+    clearTimeout(debounceTimer);
+    const value = e.target.value;
+    debounceTimer = setTimeout(() => {
+      searchTerm = value.trim().toLowerCase();
+      renderGrid();
+    }, 200);
   });
-  return lines.join("\n");
+}
+ 
+/* ------------------------------------------------------------------------
+   Chips de categoría
+   ------------------------------------------------------------------------ */
+function buildCategoryChips() {
+  const categories = [...new Set(allProducts.map((p) => p.category))].sort();
+  categoryColorMap = {};
+  categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
+
+  els.categoryChips.innerHTML = "";
+  els.categoryChips.appendChild(makeChip("Todas", null, activeCategory, (value) => {
+    activeCategory = value;
+    buildCategoryChips();
+    updateSubcategoryChips(value);
+    renderGrid();
+  }));
+  categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c, activeCategory, (value) => {
+    activeCategory = value;
+    buildCategoryChips();
+    updateSubcategoryChips(value);
+    renderGrid();
+  })));
 }
 
-/* ------------------------------------------------------------------------
-   Registro en la base de datos (planilla "Pedidos")
+// Se llama cada vez que se elige una categoría (o "Todas"). Si esa
+// categoría tiene más de una subcategoría entre los productos cargados,
+// arma y muestra su panel de subcategorías (mismo estilo de chip); si no
+// tiene, o se eligió "Todas", oculta ese panel.
+function updateSubcategoryChips(category) {
+  const subcats = category
+    ? [...new Set(allProducts.filter((p) => p.category === category).map((p) => p.subcategory).filter(Boolean))].sort()
+    : [];
 
-   Manda los datos del pedido a un Google Apps Script (ver README para
-   cómo configurarlo) que agrega una fila por cada producto pedido, todas
-   compartiendo el mismo "orderId" para poder agruparlas después.
-
-   Detalles técnicos, por si hay que tocar esto en el futuro:
-   - fetch con mode:"no-cors": Apps Script no siempre devuelve los
-     encabezados que un navegador necesita para "leer" la respuesta desde
-     JavaScript. Como acá no necesitamos leer nada de vuelta (solo que la
-     fila se guarde), no-cors evita ese problema — a cambio, nunca vamos a
-     poder saber desde acá si realmente funcionó o no. Por diseño: si
-     falla, no le mostramos ningún error al cliente (su pedido ya se
-     mandó bien por mail, que es lo que realmente le importa).
-   - Content-Type: text/plain (en vez de application/json): Apps Script no
-     responde bien a la petición de verificación previa ("preflight") que
-     hacen los navegadores antes de mandar JSON real entre dominios
-     distintos. Mandándolo como texto plano se evita ese problema, y del
-     otro lado (en el Apps Script) igual se interpreta como JSON.
-   ------------------------------------------------------------------------ */
-function logOrderToDatabase(order) {
-  if (!CONFIG.ORDERS_SHEET_WEBAPP_URL || CONFIG.ORDERS_SHEET_WEBAPP_URL.includes("PEGAR_AQUI")) {
-    // Todavía no se configuró la base de datos — se ignora en silencio,
-    // no tiene sentido molestar al cliente por algo que es 100% nuestro.
-    console.warn("CONFIG.ORDERS_SHEET_WEBAPP_URL no está configurada: el pedido no se registró en la planilla (el mail sí se mandó).");
+  if (subcats.length === 0) {
+    activeSubcategory = null;
+    els.subcategoryChips.innerHTML = "";
+    els.subcategoryChips.hidden = true;
     return;
   }
 
-  const payload = {
-    orderId: order.orderId,
-    nombre: order.nombre,
-    entidad: order.apellido, // "apellido" es en realidad el campo Entidad del formulario
-    whatsapp: order.whatsapp,
-    email: order.email,
-    items: order.items.map(({ product, qty }) => ({
-      name: product.name,
-      code: product.code,
-      category: product.category,
-      subcategory: product.subcategory,
-      lab: product.lab,
-      qty,
-    })),
-  };
-
-  try {
-    fetch(CONFIG.ORDERS_SHEET_WEBAPP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(payload),
-    }).catch((err) => {
-      console.warn("No se pudo registrar el pedido en la planilla (el mail se mandó igual):", err);
-    });
-  } catch (err) {
-    console.warn("No se pudo registrar el pedido en la planilla (el mail se mandó igual):", err);
+  // Si veníamos filtrando por una subcategoría que no pertenece a la
+  // categoría recién elegida, se descarta.
+  if (activeSubcategory && !subcats.includes(activeSubcategory)) {
+    activeSubcategory = null;
   }
+
+  renderSubcategoryChips(subcats);
+  els.subcategoryChips.hidden = false;
+}
+
+function renderSubcategoryChips(subcats) {
+  els.subcategoryChips.innerHTML = "";
+  els.subcategoryChips.appendChild(makeChip("Todas", null, activeSubcategory, (value) => {
+    activeSubcategory = value;
+    renderSubcategoryChips(subcats);
+    renderGrid();
+  }));
+  subcats.forEach((s) => els.subcategoryChips.appendChild(makeChip(s, s, activeSubcategory, (value) => {
+    activeSubcategory = value;
+    renderSubcategoryChips(subcats);
+    renderGrid();
+  })));
+}
+
+// Mismo patrón que buildCategoryChips, pero agrupando por laboratorio en
+// vez de categoría. Usa el mismo estilo de chip (.chip / .category-chips)
+// para que se vea exactamente igual.
+function buildLabChips() {
+  const labs = [...new Set(allProducts.map((p) => p.lab).filter(Boolean))].sort();
+
+  els.labChips.innerHTML = "";
+  els.labChips.appendChild(makeChip("Todos", null, activeLab, (value) => {
+    activeLab = value;
+    buildLabChips();
+    renderGrid();
+  }));
+  labs.forEach((l) => els.labChips.appendChild(makeChip(l, l, activeLab, (value) => {
+    activeLab = value;
+    buildLabChips();
+    renderGrid();
+  })));
+}
+
+// Genérico: arma un botón "chip". onSelect recibe el valor elegido (o
+// null para "Todas/Todos") y decide qué hacer — así lo puede reutilizar
+// cualquier filtro (categoría, laboratorio, o el que se agregue a futuro)
+// sin duplicar el diseño del botón.
+function makeChip(label, value, activeValue, onSelect) {
+  const chip = document.createElement("button");
+  chip.className = "chip" + (activeValue === value ? " active" : "");
+  chip.textContent = label;
+  chip.type = "button";
+  chip.addEventListener("click", () => onSelect(value));
+  return chip;
+}
+
+/* ------------------------------------------------------------------------
+   Desplegables de filtro (Categorías / Laboratorios)
+   Cada botón "toggle" muestra/oculta su propio panel de chips. Los dos
+   son independientes: se puede tener uno, el otro, los dos, o ninguno
+   abierto a la vez.
+   ------------------------------------------------------------------------ */
+function setupFilterToggles() {
+  setupFilterToggle(els.categoryToggle, els.categoryChips);
+  setupFilterToggle(els.labToggle, els.labChips);
+
+  // Al cerrar "Categorías", si había un panel de subcategorías abierto
+  // (anidado adentro), se oculta también — el filtro elegido se mantiene,
+  // solo deja de verse hasta que se vuelva a abrir "Categorías".
+  els.categoryToggle.addEventListener("click", () => {
+    if (els.categoryToggle.getAttribute("aria-expanded") !== "true") {
+      els.subcategoryChips.hidden = true;
+    }
+  });
+}
+
+function setupFilterToggle(toggleBtn, panelEl) {
+  toggleBtn.addEventListener("click", () => {
+    const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+    if (isOpen) {
+      closeFilterPanel(toggleBtn, panelEl);
+    } else {
+      toggleBtn.setAttribute("aria-expanded", "true");
+      panelEl.hidden = false;
+    }
+  });
+}
+
+function closeFilterPanel(toggleBtn, panelEl) {
+  toggleBtn.setAttribute("aria-expanded", "false");
+  panelEl.hidden = true;
+}
+
+/* ------------------------------------------------------------------------
+   Grilla de productos
+   ------------------------------------------------------------------------ */
+function renderGrid() {
+  const filtered = allProducts.filter((p) => {
+    if (activeCategory && p.category !== activeCategory) return false;
+    if (activeSubcategory && p.subcategory !== activeSubcategory) return false;
+    if (activeLab && p.lab !== activeLab) return false;
+    if (searchTerm) {
+      // El código sigue siendo buscable (útil si alguien lo tipea de
+      // memoria) aunque nunca se muestre en la tarjeta.
+      const haystack = `${p.name} ${p.category} ${p.subcategory} ${p.code} ${p.lab}`.toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+ 
+  els.grid.innerHTML = "";
+  cartIndicatorEls = {};
+ 
+  if (filtered.length === 0) {
+    els.emptyState.hidden = false;
+    return;
+  }
+  els.emptyState.hidden = true;
+ 
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((p) => fragment.appendChild(buildCard(p)));
+  els.grid.appendChild(fragment);
+}
+ 
+function availabilityTagHtml(p) {
+  const cls = p.availability === "En stock" ? "in" : "out";
+  return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
+}
+ 
+// Nota: el producto trae "code" (p.code) pero deliberadamente no se
+// renderiza en ningún lado de la tarjeta ni del modal — el cliente no debe
+// verlo en pantalla. Sigue viajando en el mail de la cotización (cart.js).
+function buildCard(p) {
+  const key = productKey(p);
+ 
+  const card = document.createElement("article");
+  card.className = "product-card";
+ 
+  const strip = document.createElement("div");
+  strip.className = "card-strip";
+  strip.style.background = categoryColorMap[p.category] || CATEGORY_COLORS[0];
+  card.appendChild(strip);
+ 
+  const media = document.createElement("div");
+  media.className = "card-media";
+  media.appendChild(buildImageEl(p, false));
+  media.addEventListener("click", () => openProductModal(p));
+  card.appendChild(media);
+ 
+  const body = document.createElement("div");
+  body.className = "card-body";
+  body.innerHTML = `
+    <h3 class="card-title">${escapeHtml(p.name)}</h3>
+    <span class="card-category">${escapeHtml(p.category)}</span>
+    ${p.subcategory ? `<span class="card-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
+    <div class="card-footer">${availabilityTagHtml(p)}</div>
+  `;
+  body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
+ 
+  const cartRow = buildCartRow(p, key);
+  body.appendChild(cartRow.wrapper);
+  card.appendChild(body);
+ 
+  cartIndicatorEls[key] = cartRow.indicatorEl;
+  updateCartIndicator(key);
+ 
+  return card;
+}
+ 
+// Controles de cantidad + botón "Agregar" (reutilizados en tarjeta y modal)
+function buildCartRow(p, key) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "card-cart-row";
+ 
+  const qtyControl = document.createElement("div");
+  qtyControl.className = "qty-control";
+ 
+  const minusBtn = document.createElement("button");
+  minusBtn.type = "button";
+  minusBtn.className = "qty-btn";
+  minusBtn.textContent = "−";
+  minusBtn.setAttribute("aria-label", "Restar uno");
+ 
+  const qtyInput = document.createElement("input");
+  qtyInput.type = "number";
+  qtyInput.className = "qty-input";
+  qtyInput.min = "0";
+  qtyInput.value = "1";
+  qtyInput.setAttribute("aria-label", `Cantidad de ${p.name}`);
+ 
+  const plusBtn = document.createElement("button");
+  plusBtn.type = "button";
+  plusBtn.className = "qty-btn";
+  plusBtn.textContent = "+";
+  plusBtn.setAttribute("aria-label", "Sumar uno");
+ 
+  const stopBubble = (fn) => (e) => { e.stopPropagation(); fn(e); };
+ 
+  minusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = Math.max(0, safeInt(qtyInput.value) - 1);
+  }));
+  plusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = safeInt(qtyInput.value) + 1;
+  }));
+  qtyInput.addEventListener("click", (e) => e.stopPropagation());
+ 
+  qtyControl.append(minusBtn, qtyInput, plusBtn);
+ 
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "add-btn";
+  addBtn.textContent = "Agregar";
+  addBtn.addEventListener("click", stopBubble(() => {
+    const qty = safeInt(qtyInput.value);
+    if (qty <= 0) {
+      removeFromCart(key);
+    } else {
+      addToCart(p, key, qty);
+    }
+  }));
+ 
+  wrapper.append(qtyControl, addBtn);
+ 
+  const indicatorEl = document.createElement("div");
+  indicatorEl.className = "cart-indicator";
+  indicatorEl.hidden = true;
+ 
+  const outer = document.createElement("div");
+  outer.appendChild(wrapper);
+  outer.appendChild(indicatorEl);
+ 
+  return { wrapper: outer, indicatorEl };
+}
+ 
+function buildImageEl(p, large) {
+  if (!p.imageUrl) {
+    const placeholder = document.createElement("div");
+    placeholder.className = "no-image";
+    placeholder.textContent = "Sin imagen";
+    return placeholder;
+  }
+  const img = document.createElement("img");
+  img.src = p.imageUrl;
+  img.alt = p.name;
+  img.loading = large ? "eager" : "lazy";
+  img.onerror = () => {
+    img.replaceWith(Object.assign(document.createElement("div"), {
+      className: "no-image",
+      textContent: "Imagen no disponible",
+    }));
+  };
+  return img;
+}
+ 
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+ 
+/* ------------------------------------------------------------------------
+   Modal de detalle de producto
+   ------------------------------------------------------------------------ */
+function openProductModal(p) {
+  const key = productKey(p);
+  els.modalBody.innerHTML = "";
+ 
+  const media = document.createElement("div");
+  media.className = "modal-media";
+  media.appendChild(buildImageEl(p, true));
+ 
+  const info = document.createElement("div");
+  info.className = "modal-info";
+  info.innerHTML = `
+    <h2 id="modal-title">${escapeHtml(p.name)}</h2>
+    <span class="modal-category">${escapeHtml(p.category)}</span>
+    ${p.subcategory ? `<span class="modal-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
+    <div class="modal-avail-row">${availabilityTagHtml(p)}</div>
+    ${p.lab ? `<div class="modal-row"><span class="k">Laboratorio</span><span>${escapeHtml(p.lab)}</span></div>` : ""}
+    ${p.description ? `<p class="modal-desc">${escapeHtml(p.description)}</p>` : ""}
+  `;
+ 
+  const cartRow = buildCartRow(p, key);
+  cartRow.wrapper.querySelector(".card-cart-row").classList.add("modal-cart-row");
+  info.appendChild(cartRow.wrapper);
+ 
+  els.modalBody.appendChild(media);
+  els.modalBody.appendChild(info);
+ 
+  cartIndicatorEls[key] = cartRow.indicatorEl;
+  updateCartIndicator(key);
+ 
+  openModalEl(els.productModal);
+}
+ 
+/* ------------------------------------------------------------------------
+   Apertura / cierre genérico de modales
+   ------------------------------------------------------------------------ */
+function openModalEl(modalEl) {
+  modalEl.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function closeModalEl(modalEl) {
+  modalEl.hidden = true;
+  if (els.productModal.hidden && els.cartModal.hidden) {
+    document.body.style.overflow = "";
+  }
+  if (modalEl === els.productModal) renderGrid();
+}
+ 
+function setupModalClosers() {
+  document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+    btn.addEventListener("click", () => closeModalEl(document.getElementById(btn.dataset.closeModal)));
+  });
+  [els.productModal, els.cartModal].forEach((overlay) => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModalEl(overlay);
+    });
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (!els.cartModal.hidden) closeModalEl(els.cartModal);
+    else if (!els.productModal.hidden) closeModalEl(els.productModal);
+  });
+}
+ 
+/* ------------------------------------------------------------------------
+   Modal / botón del carrito
+   ------------------------------------------------------------------------ */
+function setupCartModal() {
+  els.cartFab.addEventListener("click", () => {
+    renderCartModal();
+    openModalEl(els.cartModal);
+  });
+ 
+  els.clearCartBtn.addEventListener("click", () => {
+    clearCart();
+    showCartStatus("Vaciaste tu pedido.", "success");
+  });
+ 
+  els.sendGmailBtn.addEventListener("click", openGmailCompose);
+}
+ 
+function renderCartModal() {
+  const items = Object.entries(cart);
+  els.cartItemsEl.innerHTML = "";
+  els.cartEmptyEl.hidden = items.length > 0;
+ 
+  items.forEach(([key, entry]) => {
+    const row = document.createElement("div");
+    row.className = "cart-item";
+    // Acá tampoco se muestra el código: la referencia visible para el
+    // cliente es la categoría (o subcategoría, si tiene).
+    const metaText = entry.product.subcategory || entry.product.category;
+    row.innerHTML = `
+      <div class="cart-item-info">
+        <div class="cart-item-name">${escapeHtml(entry.product.name)}</div>
+        <div class="cart-item-meta">${escapeHtml(metaText)}</div>
+      </div>
+    `;
+ 
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.min = "0";
+    qtyInput.className = "cart-item-qty";
+    qtyInput.value = String(entry.qty);
+    qtyInput.setAttribute("aria-label", `Cantidad de ${entry.product.name}`);
+    qtyInput.addEventListener("change", () => {
+      const qty = safeInt(qtyInput.value);
+      if (qty <= 0) {
+        removeFromCart(key);
+      } else {
+        entry.qty = qty;
+        updateCartIndicator(key);
+      }
+    });
+ 
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "cart-item-remove";
+    removeBtn.textContent = "✕";
+    removeBtn.setAttribute("aria-label", `Quitar ${entry.product.name}`);
+    removeBtn.addEventListener("click", () => removeFromCart(key));
+ 
+    row.appendChild(qtyInput);
+    row.appendChild(removeBtn);
+    els.cartItemsEl.appendChild(row);
+  });
+}
+ 
+function showCartStatus(msg, type) {
+  els.cartStatus.hidden = false;
+  els.cartStatus.textContent = msg;
+  els.cartStatus.className = "cart-status " + type;
+}
+function hideCartStatus() {
+  els.cartStatus.hidden = true;
+}
+ 
+/* ------------------------------------------------------------------------
+   Botón "Contacto": baja a la sección de contacto al final de la página.
+   ------------------------------------------------------------------------ */
+function setupContactFab() {
+  els.contactFab.addEventListener("click", () => {
+    els.contactSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+ 
+/* ------------------------------------------------------------------------
+   Contacto de la empresa (Instagram, WhatsApp, email, horarios y mapa)
+   ------------------------------------------------------------------------ */
+function setupCompanyContact() {
+  els.contactInstagram.href = CONFIG.COMPANY_INSTAGRAM_URL;
+  els.contactInstagramValue.textContent = CONFIG.COMPANY_INSTAGRAM_HANDLE;
+ 
+  els.contactWhatsapp.href = `https://wa.me/${CONFIG.COMPANY_WHATSAPP_NUMBER}`;
+  els.contactWhatsappValue.textContent = CONFIG.COMPANY_WHATSAPP_DISPLAY;
+ 
+  els.contactGmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}&su=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}`;
+  els.contactGmailValue.textContent = CONFIG.COMPANY_EMAIL;
+ 
+  els.contactHoursValue.textContent = CONFIG.COMPANY_HOURS;
+ 
+  els.contactAddressValue.textContent = CONFIG.COMPANY_ADDRESS;
+  // Ojo: acá se usa COMPANY_MAP_QUERY (coordenadas), no COMPANY_ADDRESS
+  // (texto) — es lo que evita que aparezcan varias ubicaciones posibles.
+  const encodedQuery = encodeURIComponent(CONFIG.COMPANY_MAP_QUERY);
+  els.contactMapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+  els.contactMapIframe.src = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
+}
+ 
+/* ------------------------------------------------------------------------
+   Banner de estado del catálogo
+   ------------------------------------------------------------------------ */
+function showStatus(msg, type) {
+  els.statusBanner.hidden = false;
+  els.statusBanner.textContent = msg;
+  els.statusBanner.className = "status-banner" + (type === "info" ? " info" : "");
+}
+function hideStatus() {
+  els.statusBanner.hidden = true;
 }
