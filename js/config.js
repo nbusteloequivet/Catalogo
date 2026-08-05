@@ -54,7 +54,16 @@ const CONFIG = {
   // el logo cambia. Actualmente es un archivo .png/.jpg (raster): si es
   // de baja resolución, agrandarlo mucho en style.css lo va a ver
   // borroso — ver la nota en .brand-emblem img dentro de style.css.
-  LOGO_PATH: "assets/logo-equivet.jpg",
+  LOGO_PATH: "assets/logo-equivet.png",
+
+  // ---- Base de datos de pedidos (planilla "Pedidos") ----
+  // URL del Google Apps Script publicado como "Web App" (ver README para
+  // el paso a paso de cómo generarla). Cada vez que alguien envía un
+  // presupuesto, además del mail, se manda una copia de los datos acá
+  // para ir guardando un historial de pedidos en la planilla. Si esto
+  // falla por lo que sea, el mail se manda igual — nunca depende uno
+  // del otro.
+  ORDERS_SHEET_WEBAPP_URL: "PEGAR_AQUI_LA_URL_DEL_APPS_SCRIPT",
 };
 
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
