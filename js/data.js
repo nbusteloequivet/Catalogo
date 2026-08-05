@@ -52,6 +52,7 @@ function loadCatalog() {
 
 function finishLoad() {
   buildCategoryChips();
+  buildLabChips();
   renderGrid();
 }
 
