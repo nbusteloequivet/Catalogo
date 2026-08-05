@@ -54,7 +54,7 @@ const CONFIG = {
   // el logo cambia. Actualmente es un archivo .png/.jpg (raster): si es
   // de baja resolución, agrandarlo mucho en style.css lo va a ver
   // borroso — ver la nota en .brand-emblem img dentro de style.css.
-  LOGO_PATH: "assets/logo-equivet.png",
+  LOGO_PATH: "assets/logo-equivet.jpg",
 };
 
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
