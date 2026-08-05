@@ -61,7 +61,7 @@ a { color: var(--accent); }
      resolución (140×103px original), a este tamaño puede notarse
      borroso — si es así, es el archivo, no este número; ver charla
      anterior sobre reemplazarlo por uno de mayor resolución o vectorial. */
-  height: 300px;
+  height: 190px;
   width: auto;
   display: block;
 }
@@ -127,7 +127,7 @@ a { color: var(--accent); }
   transition: all 0.15s ease;
 }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
-.chip.active { background: var(--ink); border-color: var(--ink); color: var(--paper-raised); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: #ffffff; }
 .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- Banner de estado ---------- */
