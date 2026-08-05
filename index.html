@@ -72,8 +72,20 @@
 
   <div class="filter-row">
     <input type="text" id="search-input" placeholder="Buscar producto, categoría o laboratorio…" autocomplete="off">
-    <div id="category-chips" class="category-chips"></div>
-    <div id="lab-chips" class="category-chips"></div>
+    <div class="filter-toggles">
+      <div class="filter-group">
+        <button id="category-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="category-chips">
+          Categorías <span class="filter-toggle-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div id="category-chips" class="category-chips chips-panel" hidden></div>
+      </div>
+      <div class="filter-group">
+        <button id="lab-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="lab-chips">
+          Laboratorios <span class="filter-toggle-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div id="lab-chips" class="category-chips chips-panel" hidden></div>
+      </div>
+    </div>
   </div>
 </header>
 
