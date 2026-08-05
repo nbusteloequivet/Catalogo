@@ -278,15 +278,18 @@ a { color: var(--accent); }
   margin: 0 0 4px;
   line-height: 1.25;
   /* Altura FIJA de exactamente 2 renglones (17px × 1.25 × 2), siempre la
-     misma tenga el nombre 1 o 2 renglones — así todo lo que va debajo
-     (categoría, disponibilidad, "Agregar") arranca a la misma altura en
-     toda la fila. display:flex + align-items:center centra el texto
-     dentro de esa altura, para que un nombre de 1 renglón quede
-     centrado en vez de pegado arriba con un hueco vacío debajo. */
+     misma tenga el nombre 1, 2 o más renglones — así todo lo que va
+     debajo (categoría, disponibilidad, "Agregar") arranca a la misma
+     altura en toda la fila. En mobile, la tarjeta es más angosta y un
+     nombre largo puede necesitar 3 renglones; -webkit-line-clamp corta
+     prolijo con "…" después del 2do renglón en vez de partir el 3ro a la
+     mitad (que es lo que pasaba antes). height + overflow quedan como
+     resguardo por si algún navegador viejo no soporta line-clamp. */
   height: 43px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 .card-category { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
 .card-subcategory { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); opacity: 0.8; }
