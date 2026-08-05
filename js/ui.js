@@ -29,15 +29,17 @@ function buildCategoryChips() {
   categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
 
   els.categoryChips.innerHTML = "";
-  els.categoryChips.appendChild(makeChip("Todas las categorías", null, activeCategory, (value) => {
+  els.categoryChips.appendChild(makeChip("Todas", null, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
+    closeFilterPanel(els.categoryToggle, els.categoryChips);
   }));
   categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
+    closeFilterPanel(els.categoryToggle, els.categoryChips);
   })));
 }
 
@@ -48,15 +50,17 @@ function buildLabChips() {
   const labs = [...new Set(allProducts.map((p) => p.lab).filter(Boolean))].sort();
 
   els.labChips.innerHTML = "";
-  els.labChips.appendChild(makeChip("Todos los laboratorios", null, activeLab, (value) => {
+  els.labChips.appendChild(makeChip("Todos", null, activeLab, (value) => {
     activeLab = value;
     buildLabChips();
     renderGrid();
+    closeFilterPanel(els.labToggle, els.labChips);
   }));
   labs.forEach((l) => els.labChips.appendChild(makeChip(l, l, activeLab, (value) => {
     activeLab = value;
     buildLabChips();
     renderGrid();
+    closeFilterPanel(els.labToggle, els.labChips);
   })));
 }
 
@@ -71,6 +75,34 @@ function makeChip(label, value, activeValue, onSelect) {
   chip.type = "button";
   chip.addEventListener("click", () => onSelect(value));
   return chip;
+}
+
+/* ------------------------------------------------------------------------
+   Desplegables de filtro (Categorías / Laboratorios)
+   Cada botón "toggle" muestra/oculta su propio panel de chips. Los dos
+   son independientes: se puede tener uno, el otro, los dos, o ninguno
+   abierto a la vez.
+   ------------------------------------------------------------------------ */
+function setupFilterToggles() {
+  setupFilterToggle(els.categoryToggle, els.categoryChips);
+  setupFilterToggle(els.labToggle, els.labChips);
+}
+
+function setupFilterToggle(toggleBtn, panelEl) {
+  toggleBtn.addEventListener("click", () => {
+    const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+    if (isOpen) {
+      closeFilterPanel(toggleBtn, panelEl);
+    } else {
+      toggleBtn.setAttribute("aria-expanded", "true");
+      panelEl.hidden = false;
+    }
+  });
+}
+
+function closeFilterPanel(toggleBtn, panelEl) {
+  toggleBtn.setAttribute("aria-expanded", "false");
+  panelEl.hidden = true;
 }
 
 /* ------------------------------------------------------------------------
