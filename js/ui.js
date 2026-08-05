@@ -33,13 +33,11 @@ function buildCategoryChips() {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
-    closeFilterPanel(els.categoryToggle, els.categoryChips);
   }));
   categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
-    closeFilterPanel(els.categoryToggle, els.categoryChips);
   })));
 }
 
@@ -54,13 +52,11 @@ function buildLabChips() {
     activeLab = value;
     buildLabChips();
     renderGrid();
-    closeFilterPanel(els.labToggle, els.labChips);
   }));
   labs.forEach((l) => els.labChips.appendChild(makeChip(l, l, activeLab, (value) => {
     activeLab = value;
     buildLabChips();
     renderGrid();
-    closeFilterPanel(els.labToggle, els.labChips);
   })));
 }
 
