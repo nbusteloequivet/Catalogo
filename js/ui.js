@@ -27,31 +27,59 @@ function buildCategoryChips() {
   const categories = [...new Set(allProducts.map((p) => p.category))].sort();
   categoryColorMap = {};
   categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
- 
+
   els.categoryChips.innerHTML = "";
-  els.categoryChips.appendChild(makeChip("Todas", null));
-  categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c)));
-}
- 
-function makeChip(label, value) {
-  const chip = document.createElement("button");
-  chip.className = "chip" + (activeCategory === value ? " active" : "");
-  chip.textContent = label;
-  chip.type = "button";
-  chip.addEventListener("click", () => {
+  els.categoryChips.appendChild(makeChip("Todas", null, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
-  });
+  }));
+  categories.forEach((c) => els.categoryChips.appendChild(makeChip(c, c, activeCategory, (value) => {
+    activeCategory = value;
+    buildCategoryChips();
+    renderGrid();
+  })));
+}
+
+// Mismo patrón que buildCategoryChips, pero agrupando por laboratorio en
+// vez de categoría. Usa el mismo estilo de chip (.chip / .category-chips)
+// para que se vea exactamente igual.
+function buildLabChips() {
+  const labs = [...new Set(allProducts.map((p) => p.lab).filter(Boolean))].sort();
+
+  els.labChips.innerHTML = "";
+  els.labChips.appendChild(makeChip("Todos", null, activeLab, (value) => {
+    activeLab = value;
+    buildLabChips();
+    renderGrid();
+  }));
+  labs.forEach((l) => els.labChips.appendChild(makeChip(l, l, activeLab, (value) => {
+    activeLab = value;
+    buildLabChips();
+    renderGrid();
+  })));
+}
+
+// Genérico: arma un botón "chip". onSelect recibe el valor elegido (o
+// null para "Todas/Todos") y decide qué hacer — así lo puede reutilizar
+// cualquier filtro (categoría, laboratorio, o el que se agregue a futuro)
+// sin duplicar el diseño del botón.
+function makeChip(label, value, activeValue, onSelect) {
+  const chip = document.createElement("button");
+  chip.className = "chip" + (activeValue === value ? " active" : "");
+  chip.textContent = label;
+  chip.type = "button";
+  chip.addEventListener("click", () => onSelect(value));
   return chip;
 }
- 
+
 /* ------------------------------------------------------------------------
    Grilla de productos
    ------------------------------------------------------------------------ */
 function renderGrid() {
   const filtered = allProducts.filter((p) => {
     if (activeCategory && p.category !== activeCategory) return false;
+    if (activeLab && p.lab !== activeLab) return false;
     if (searchTerm) {
       // El código sigue siendo buscable (útil si alguien lo tipea de
       // memoria) aunque nunca se muestre en la tarjeta.
