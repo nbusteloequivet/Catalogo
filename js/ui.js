@@ -29,7 +29,7 @@ function buildCategoryChips() {
   categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
 
   els.categoryChips.innerHTML = "";
-  els.categoryChips.appendChild(makeChip("Todas", null, activeCategory, (value) => {
+  els.categoryChips.appendChild(makeChip("Todas las categorías", null, activeCategory, (value) => {
     activeCategory = value;
     buildCategoryChips();
     renderGrid();
@@ -48,7 +48,7 @@ function buildLabChips() {
   const labs = [...new Set(allProducts.map((p) => p.lab).filter(Boolean))].sort();
 
   els.labChips.innerHTML = "";
-  els.labChips.appendChild(makeChip("Todos", null, activeLab, (value) => {
+  els.labChips.appendChild(makeChip("Todos los laboratorios", null, activeLab, (value) => {
     activeLab = value;
     buildLabChips();
     renderGrid();
