@@ -57,13 +57,11 @@ a { color: var(--accent); }
   margin-top: 6px;
 }
 .brand-emblem img {
-  /* Volvimos a un archivo raster (.png/.jpg). El logo anterior medía
-     apenas 140×103px de origen — mostrarlo mucho más grande que eso es
-     lo que lo vuelve borroso, no hay más detalle en la imagen para
-     agrandar. Este tamaño queda cerca de esa resolución real. Si en
-     algún momento conseguís un archivo de mayor resolución (o volvés a
-     un .svg que se vea bien), subir este número de vuelta es seguro. */
-  height: 105px;
+  /* Agrandado a pedido. Si el archivo actual sigue siendo el de baja
+     resolución (140×103px original), a este tamaño puede notarse
+     borroso — si es así, es el archivo, no este número; ver charla
+     anterior sobre reemplazarlo por uno de mayor resolución o vectorial. */
+  height: 190px;
   width: auto;
   display: block;
 }
@@ -86,12 +84,11 @@ a { color: var(--accent); }
   border: 0;
 }
 
+/* Slogan oculto a pedido. Se deja el elemento y el JS que le escribe el
+   texto intactos (no se tocan index.html ni main.js) — así, si en algún
+   momento se quiere mostrar de nuevo, alcanza con borrar esta regla. */
 .brand-sub {
-  margin: 10px 0 0;
-  font-size: 22px;
-  font-weight: 700;
-  font-style: italic;
-  color: var(--ink);
+  display: none;
 }
 
 .filter-row {
@@ -691,7 +688,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
-  .brand-emblem img { height: 90px; }
+  .brand-emblem img { height: 130px; }
   .fab-stack { right: 14px; bottom: 14px; gap: 8px; }
   .fab { padding: 10px 16px; font-size: 12.5px; }
 
