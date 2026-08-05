@@ -162,6 +162,15 @@ a { color: var(--accent); }
   transform: rotate(180deg);
 }
 
+/* Sin esta regla, ".category-chips { display: flex }" de más abajo le
+   gana al atributo "hidden" del HTML (mismo problema que tuvo el modal
+   hace un tiempo) y el panel queda siempre visible, tocaras o no el
+   botón. Esta regla es más específica (una clase + el atributo) así que
+   gana ella, sin importar en qué orden esté escrita en el archivo. */
+.chips-panel[hidden] {
+  display: none;
+}
+
 .chip {
   font-family: var(--font-mono);
   font-size: 12px;
