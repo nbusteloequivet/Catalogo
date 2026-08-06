@@ -29,10 +29,10 @@ const CONFIG = {
   COMPANY_INSTAGRAM_URL: "https://instagram.com/equivet_arg",
   COMPANY_INSTAGRAM_HANDLE: "@equivet_arg",
 
-  COMPANY_WHATSAPP_NUMBER: "5491140780872",
-  COMPANY_WHATSAPP_DISPLAY: "+54 9 11 4078-0872",
+  COMPANY_WHATSAPP_NUMBER: "5491179031788",
+  COMPANY_WHATSAPP_DISPLAY: "+54 9 11 7903-1788",
 
-  COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
+  COMPANY_EMAIL: "Info@equivet.com.ar",
 
   COMPANY_HOURS: "Lunes a viernes de 9 a 17 hs",
 
@@ -51,10 +51,8 @@ const CONFIG = {
 
   // Ruta del logo (usado en el header). Acepta .png, .jpg o .svg — el
   // navegador lo muestra igual, solo cambiá el nombre de archivo acá si
-  // el logo cambia. Actualmente es un archivo .png/.jpg (raster): si es
-  // de baja resolución, agrandarlo mucho en style.css lo va a ver
-  // borroso — ver la nota en .brand-emblem img dentro de style.css.
-  LOGO_PATH: "assets/logo-equivet.png",
+  // el logo cambia.
+  LOGO_PATH: "assets/logo-equivet.jpg",
 
   // ---- Base de datos de pedidos (planilla "Pedidos") ----
   // URL del Google Apps Script publicado como "Web App" (ver README para
