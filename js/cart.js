@@ -89,6 +89,7 @@ function prepareOrder() {
   const apellido = els.cartApellido.value.trim();
   const whatsapp = els.cartWhatsapp.value.trim();
   const email = els.cartEmail.value.trim();
+  const mensaje = els.cartMensaje.value.trim();
 
   if (items.length === 0) {
     showCartStatus("Todavía no agregaste ningún producto al pedido.", "error");
@@ -98,16 +99,16 @@ function prepareOrder() {
     showCartStatus("Completá tus datos antes de enviar.", "error");
     return null;
   }
-  // WhatsApp y Email son opcionales — no bloquean el envío.
+  // WhatsApp, Email y Mensaje adicional son opcionales — no bloquean el envío.
 
   // ID simple para poder agrupar en la planilla todas las filas que
   // pertenecen a este mismo pedido (un timestamp alcanza: es único y
   // además queda ordenable cronológicamente sin ningún esfuerzo extra).
   const orderId = String(Date.now());
 
-  const message = buildOrderMessage({ nombre, apellido, whatsapp, email, items });
+  const message = buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items });
 
-  return { orderId, nombre, apellido, whatsapp, email, items, message };
+  return { orderId, nombre, apellido, whatsapp, email, mensaje, items, message };
 }
 
 function isAndroidDevice() {
@@ -117,17 +118,17 @@ function isMobileDevice() {
   return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
-function openGmailCompose() {
-  const order = prepareOrder();
-  if (order === null) return;
-
-  const to = encodeURIComponent(CONFIG.ORDER_EMAIL);
-  const subject = encodeURIComponent(CONFIG.ORDER_EMAIL_SUBJECT);
-  const body = encodeURIComponent(order.message);
+// Abre la redacción de Gmail con destinatario/asunto/cuerpo ya cargados,
+// adaptado al dispositivo. La usan tanto el envío del presupuesto
+// (más abajo) como el botón de Email de la sección Contacto (ui.js).
+function openGmailComposeUrl(to, subject, body) {
+  const toParam = encodeURIComponent(to);
+  const subjectParam = encodeURIComponent(subject || "");
+  const bodyParam = encodeURIComponent(body || "");
 
   // Link "de siempre": funciona bien en PC y en iPhone (ahí, si tiene la
   // app de Gmail, Safari la ofrece igual con el texto cargado).
-  const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+  const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toParam}&su=${subjectParam}&body=${bodyParam}`;
 
   if (isAndroidDevice()) {
     // En Android, un link común a mail.google.com muchas veces abre la
@@ -137,7 +138,7 @@ function openGmailCompose() {
     // no la tiene instalada, S.browser_fallback_url hace que caiga sola
     // al link de arriba en el navegador.
     const intentUrl =
-      `intent://send?to=${to}&subject=${subject}&body=${body}` +
+      `intent://send?to=${toParam}&subject=${subjectParam}&body=${bodyParam}` +
       `#Intent;scheme=mailto;package=com.google.android.gm;` +
       `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
     window.location.href = intentUrl;
@@ -146,9 +147,16 @@ function openGmailCompose() {
     // pestaña nueva para que el sistema ofrezca la app correctamente.
     window.location.href = webUrl;
   } else {
-    // PC: pestaña nueva, así no se pierde el catálogo de fondo.
+    // PC: pestaña nueva, así no se pierde el catálogo/la página de fondo.
     window.open(webUrl, "_blank", "noopener,noreferrer");
   }
+}
+
+function openGmailCompose() {
+  const order = prepareOrder();
+  if (order === null) return;
+
+  openGmailComposeUrl(CONFIG.ORDER_EMAIL, CONFIG.ORDER_EMAIL_SUBJECT, order.message);
 
   showCartStatus("Se abrió Gmail con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
 
@@ -157,7 +165,7 @@ function openGmailCompose() {
   logOrderToDatabase(order);
 }
 
-function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
+function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }) {
   const lines = [];
   lines.push(`Pedido - ${CONFIG.LAB_NAME}`);
   lines.push("");
@@ -171,6 +179,11 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, items }) {
     const codePart = product.code ? ` (${product.code})` : "";
     lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
   });
+  if (mensaje) {
+    lines.push("");
+    lines.push("Mensaje adicional:");
+    lines.push(mensaje);
+  }
   return lines.join("\n");
 }
 
@@ -209,6 +222,7 @@ function logOrderToDatabase(order) {
     entidad: order.apellido, // "apellido" es en realidad el campo Entidad del formulario
     whatsapp: order.whatsapp,
     email: order.email,
+    mensaje: order.mensaje,
     items: order.items.map(({ product, qty }) => ({
       name: product.name,
       code: product.code,
