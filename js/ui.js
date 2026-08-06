@@ -477,7 +477,11 @@ function setupCompanyContact() {
   els.contactWhatsapp.href = `https://wa.me/${CONFIG.COMPANY_WHATSAPP_NUMBER}`;
   els.contactWhatsappValue.textContent = CONFIG.COMPANY_WHATSAPP_DISPLAY;
  
-  els.contactGmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}&su=${encodeURIComponent(CONFIG.COMPANY_EMAIL)}`;
+  els.contactGmail.href = "#";
+  els.contactGmail.addEventListener("click", (e) => {
+    e.preventDefault();
+    openGmailComposeUrl(CONFIG.COMPANY_EMAIL, "", "");
+  });
   els.contactGmailValue.textContent = CONFIG.COMPANY_EMAIL;
  
   els.contactHoursValue.textContent = CONFIG.COMPANY_HOURS;
