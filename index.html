@@ -14,7 +14,7 @@
 <meta property="og:title" content="EquiVet — Laboratorio de Reproducción Equina">
 <meta property="og:description" content="Catálogo de productos y pedidos de cotización de EquiVet, laboratorio de reproducción equina en Los Cardales, Buenos Aires.">
 <meta property="og:url" content="https://nbusteloequivet.github.io/Catalogo/">
-<meta property="og:image" content="https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.png">
+<meta property="og:image" content="https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.jpg">
 
 <!-- Datos estructurados: le dicen a Google explícitamente qué es la
      empresa, dónde está y cómo contactarla (nombre, dirección, teléfono,
@@ -29,9 +29,9 @@
   "@type": "VeterinaryCare",
   "name": "EquiVet",
   "description": "Laboratorio especializado en reproducción equina.",
-  "image": "https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.png",
+  "image": "https://nbusteloequivet.github.io/Catalogo/assets/logo-equivet.jpg",
   "url": "https://nbusteloequivet.github.io/Catalogo/",
-  "telephone": "+5491140780872",
+  "telephone": "+5491179031788",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Reconquista 177",
@@ -58,11 +58,6 @@
   <div class="header-inner">
     <div class="brand">
       <h1 id="lab-name">EquiVet — Laboratorio de Reproducción Equina, Los Cardales</h1>
-      <!-- Nota: el archivo del logo tiene el texto "Veterinaria Equina" en
-           blanco (pensado para fondo oscuro), así que sobre el fondo
-           blanco de la página ese texto no se llega a leer — se ve el
-           caballo violeta. Si conseguís una versión con texto oscuro,
-           alcanza con reemplazar assets/logo-equivet.png. -->
       <span class="brand-emblem">
         <img id="brand-logo" src="" alt="Logo EquiVet">
       </span>
@@ -133,14 +128,14 @@
   </section>
 </main>
 
-<!-- Botones flotantes: Contacto (baja a la sección de contacto) y Mi pedido -->
+<!-- Botones flotantes: Mi presupuesto y Contacto (baja a la sección de contacto) -->
 <div class="fab-stack">
-  <button id="contact-fab" class="fab fab-secondary" type="button">
-    Contacto
-  </button>
   <button id="cart-fab" class="fab fab-primary" type="button" aria-haspopup="dialog">
     Mi presupuesto
     <span id="cart-count" class="cart-count" hidden>0</span>
+  </button>
+  <button id="contact-fab" class="fab fab-secondary" type="button">
+    Contacto
   </button>
 </div>
 
@@ -157,7 +152,7 @@
   <div class="modal-content cart-modal-content" role="dialog" aria-modal="true" aria-labelledby="cart-title">
     <button class="modal-close" data-close-modal="cart-modal" aria-label="Cerrar">✕</button>
     <div class="cart-modal-inner">
-      <h2 id="cart-title">Tu pedido</h2>
+      <h2 id="cart-title">Mi presupuesto</h2>
 
       <div id="cart-items" class="cart-items"></div>
       <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos. Cerrá esta ventana y elegí cantidades desde el catálogo.</p>
@@ -176,7 +171,9 @@
         <label>Email (opcional)
           <input id="cart-email" type="email" placeholder="tu@email.com" autocomplete="email">
         </label>
-        <p class="cart-hint">Dejanos tu WhatsApp o email si preferís que te contactemos por ahí.</p>
+        <label>Mensaje adicional (opcional)
+          <textarea id="cart-mensaje" rows="3" placeholder="¿Algo que quieras aclararnos sobre este pedido?"></textarea>
+        </label>
       </div>
 
       <div id="cart-status" class="cart-status" hidden></div>
