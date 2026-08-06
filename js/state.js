@@ -55,6 +55,7 @@ function cacheElements() {
   els.cartApellido = document.getElementById("cart-apellido");
   els.cartWhatsapp = document.getElementById("cart-whatsapp");
   els.cartEmail = document.getElementById("cart-email");
+  els.cartMensaje = document.getElementById("cart-mensaje");
   els.cartStatus = document.getElementById("cart-status");
   els.clearCartBtn = document.getElementById("clear-cart-btn");
 
