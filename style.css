@@ -688,7 +688,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 
 .cart-form { display: flex; flex-direction: column; gap: 10px; border-top: 1.5px solid var(--ink); padding-top: 16px; }
 .cart-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-soft); font-weight: 600; }
-.cart-form input {
+.cart-form input, .cart-form textarea {
   font-family: var(--font-body);
   font-size: 14px;
   padding: 9px 12px;
@@ -696,9 +696,9 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   border-radius: 3px;
   color: var(--ink);
   font-weight: 400;
+  resize: vertical;
 }
-.cart-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.cart-hint { font-size: 11.5px; color: var(--ink-soft); margin: 0; }
+.cart-form input:focus-visible, .cart-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .cart-status {
   font-size: 13px;
