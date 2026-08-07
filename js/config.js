@@ -32,7 +32,7 @@ const CONFIG = {
   COMPANY_WHATSAPP_NUMBER: "5491179031788",
   COMPANY_WHATSAPP_DISPLAY: "+54 9 11 7903-1788",
 
-  COMPANY_EMAIL: "Info@equivet.com.ar",
+  COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
 
   COMPANY_HOURS: "Lunes a viernes de 9 a 17 hs",
 
