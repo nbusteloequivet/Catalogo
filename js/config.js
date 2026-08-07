@@ -61,7 +61,7 @@ const CONFIG = {
   // para ir guardando un historial de pedidos en la planilla. Si esto
   // falla por lo que sea, el mail se manda igual — nunca depende uno
   // del otro.
-  ORDERS_SHEET_WEBAPP_URL: "PEGAR_AQUI_LA_URL_DEL_APPS_SCRIPT",
+  ORDERS_SHEET_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbzh_Ync4bQOfKprLcN4faM6cn04MMfZoegSFYPH8TVwvLSxJbJ3s5uRphAX-Th2MjPK4Q/exec",
 };
 
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
