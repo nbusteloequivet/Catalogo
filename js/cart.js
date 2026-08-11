@@ -226,8 +226,8 @@ function logOrderToDatabase(order) {
     items: order.items.map(({ product, qty }) => ({
       name: product.name,
       code: product.code,
-      category: product.category,
-      subcategory: product.subcategory,
+      category: product.categories.join(", "),
+      subcategory: product.subcategories.join(", "),
       lab: product.lab,
       qty,
     })),
