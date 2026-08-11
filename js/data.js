@@ -53,9 +53,32 @@ function loadCatalog() {
 }
 
 function finishLoad() {
+  computeDuplicateNames();
   buildCategoryChips();
   buildLabChips();
   renderGrid();
+}
+
+// Para "PORTA OBJETOS X" vs "porta objetos x  " -> mismo nombre a los
+// fines de esta comparación (sin importar mayúsculas ni espacios de más).
+function normalizeNameForCompare(name) {
+  return (name || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+// Arma el set de nombres que se repiten en más de un producto (son casos
+// legítimos: mismo producto, pero de 2 laboratorios distintos — quedan 2
+// tarjetas a propósito). Se usa en ui.js para mostrar el laboratorio SOLO
+// en esas tarjetas puntuales, ya que ahí es lo único que las diferencia a
+// simple vista.
+function computeDuplicateNames() {
+  const counts = {};
+  allProducts.forEach((p) => {
+    const key = normalizeNameForCompare(p.name);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  duplicateProductNames = new Set(
+    Object.keys(counts).filter((key) => counts[key] > 1)
+  );
 }
 
 /* ------------------------------------------------------------------------
