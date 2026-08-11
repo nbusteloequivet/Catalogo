@@ -15,6 +15,12 @@ const CONFIG = {
   // Cada cuánto se vuelve a consultar la planilla sola, en milisegundos
   AUTO_REFRESH_MS: 30000,
 
+  // Cartel rojo entre el logo y el buscador, avisando que todavía se
+  // están cargando productos al catálogo. Poné esto en false (sin comillas)
+  // el día que ya esté cargado todo el catálogo, para que deje de mostrarse
+  // — no hace falta tocar index.html ni style.css para eso.
+  SHOW_LOADING_BANNER: true,
+
   // Ancho de imagen que se le pide a Drive
   IMAGE_WIDTH: 500,
 
