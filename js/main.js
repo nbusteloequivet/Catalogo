@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // configurable acá porque ese sí se ve.
   els.labSub.textContent = CONFIG.LAB_SUBTITLE;
   els.logoImg.src = CONFIG.LOGO_PATH;
+  els.loadingBanner.hidden = !CONFIG.SHOW_LOADING_BANNER;
 
   setupSearch();
   setupFilterToggles();
