@@ -218,17 +218,33 @@ function buildCard(p) {
   // agregáramos cuando corresponde, esas tarjetas puntuales quedarían más
   // altas que el resto de la grilla.
   const showLab = Boolean(p.lab) && duplicateProductNames.has(normalizeNameForCompare(p.name));
+
+  // Una categoría/subcategoría por renglón (en vez de todas juntas
+  // separadas por coma en un solo renglón) — con 2 o más queda mucho más
+  // legible. Cada <span> es un hijo directo de .card-body (flex-column),
+  // así que cada uno cae en su propia línea solo.
+  const categoryHtml = p.categories.map((c) => `<span class="card-category">${escapeHtml(c)}</span>`).join("");
+  const subcategoryHtml = p.subcategories.map((s) => `<span class="card-subcategory">${escapeHtml(s)}</span>`).join("");
+
+  // ".card-bottom" agrupa la línea divisoria + "En stock" + selector de
+  // cantidad + "Agregar" en un solo bloque anclado siempre al FONDO de la
+  // tarjeta (margin-top: auto en style.css), sin importar cuánto texto
+  // haya arriba (nombre, categorías, subcategorías, laboratorio). Así la
+  // línea divisoria queda siempre a la misma altura en toda la fila de la
+  // grilla, tenga el producto 1 categoría o 3.
   body.innerHTML = `
     <h3 class="card-title">${escapeHtml(p.name)}</h3>
-    <span class="card-category">${escapeHtml(p.categories.join(", "))}</span>
-    ${p.subcategories.length ? `<span class="card-subcategory">${escapeHtml(p.subcategories.join(", "))}</span>` : ""}
+    ${categoryHtml}
+    ${subcategoryHtml}
     <span class="card-lab">${showLab ? escapeHtml(p.lab) : ""}</span>
-    <div class="card-footer">${availabilityTagHtml(p)}</div>
+    <div class="card-bottom">
+      <div class="card-footer">${availabilityTagHtml(p)}</div>
+    </div>
   `;
   body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
  
   const cartRow = buildCartRow(p, key);
-  body.appendChild(cartRow.wrapper);
+  body.querySelector(".card-bottom").appendChild(cartRow.wrapper);
   card.appendChild(body);
  
   cartIndicatorEls[key] = cartRow.indicatorEl;
@@ -341,10 +357,11 @@ function openProductModal(p) {
  
   const info = document.createElement("div");
   info.className = "modal-info";
+  const modalCategoryHtml = p.categories.map((c) => `<span class="modal-category">${escapeHtml(c)}</span>`).join("");
+  const modalSubcategoryHtml = p.subcategories.map((s) => `<span class="modal-subcategory">${escapeHtml(s)}</span>`).join("");
   info.innerHTML = `
     <h2 id="modal-title">${escapeHtml(p.name)}</h2>
-    <span class="modal-category">${escapeHtml(p.categories.join(", "))}</span>
-    ${p.subcategories.length ? `<span class="modal-subcategory">${escapeHtml(p.subcategories.join(", "))}</span>` : ""}
+    <div class="modal-tags">${modalCategoryHtml}${modalSubcategoryHtml}</div>
     <div class="modal-avail-row">${availabilityTagHtml(p)}</div>
     ${p.lab ? `<div class="modal-row"><span class="k">Laboratorio</span><span>${escapeHtml(p.lab)}</span></div>` : ""}
     ${p.description ? `<p class="modal-desc">${escapeHtml(p.description)}</p>` : ""}
