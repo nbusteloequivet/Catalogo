@@ -65,6 +65,13 @@
     </div>
   </div>
 
+  <!-- Aviso temporal: se muestra/oculta con CONFIG.SHOW_LOADING_BANNER en
+       js/config.js (nada que tocar acá ni en el CSS). Cuando ya esté
+       cargado el catálogo completo, alcanza con poner ese valor en false. -->
+  <div id="loading-products-banner" class="loading-products-banner" hidden>
+    <p>Estamos cargando productos en la página. Si algún producto falta, escribinos el producto y la cantidad que requerís en la casilla "Mensaje adicional" en el apartado "Mi presupuesto". Disculpe las molestias.</p>
+  </div>
+
   <div class="filter-row">
     <input type="text" id="search-input" placeholder="Buscar producto, categoría o laboratorio…" autocomplete="off">
     <div class="filter-toggles">
@@ -155,7 +162,7 @@
       <h2 id="cart-title">Mi presupuesto</h2>
 
       <div id="cart-items" class="cart-items"></div>
-      <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos. Cerrá esta ventana y elegí cantidades desde el catálogo.</p>
+      <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos del catálogo. Si no encontrás lo que buscás, contanos qué necesitás en "Mensaje adicional" y enviá el pedido igual.</p>
 
       <div class="cart-form">
         <h3>Tus datos de contacto</h3>
