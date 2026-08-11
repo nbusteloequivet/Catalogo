@@ -19,7 +19,7 @@ const CONFIG = {
   IMAGE_WIDTH: 500,
 
   // ---- Datos de destino del pedido: A DÓNDE TE LLEGA A VOS ----
-  ORDER_EMAIL: "nbustelo.equivet@gmail.com",
+  ORDER_EMAIL: "info@equivet.com.ar",
 
   // Asunto FIJO para todos los mails de cotización (para poder filtrarlos
   // y agruparlos en tu casilla).
@@ -32,7 +32,7 @@ const CONFIG = {
   COMPANY_WHATSAPP_NUMBER: "5491158846826",
   COMPANY_WHATSAPP_DISPLAY: "+54 9 11 5884-6826",
 
-  COMPANY_EMAIL: "nbustelo.equivet@gmail.com",
+  COMPANY_EMAIL: "info@equivet.com.ar",
 
   COMPANY_HOURS: "Lunes a viernes de 9 a 17 hs",
 
