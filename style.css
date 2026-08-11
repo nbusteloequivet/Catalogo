@@ -100,6 +100,30 @@ a { color: var(--accent); }
   gap: 14px;
 }
 
+/* ---------- Cartel de aviso (productos en carga) ----------
+   Deliberadamente en rojo/de alerta — distinto del banner de estado del
+   catálogo (.status-banner, violeta/neutro) para que se note que es un
+   aviso al cliente y no un mensaje técnico. Se activa/desactiva desde
+   CONFIG.SHOW_LOADING_BANNER (js/config.js), no hace falta tocar esto. */
+.loading-products-banner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 28px 18px;
+}
+.loading-products-banner p {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1.5px solid #e63946;
+  border-left-width: 5px;
+  border-radius: 3px;
+  background: #fff3f3;
+  color: #b3001b;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
 #search-input {
   font-family: var(--font-body);
   font-size: 14px;
@@ -298,6 +322,25 @@ a { color: var(--accent); }
 }
 .card-category { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
 .card-subcategory { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); opacity: 0.8; }
+
+/* Laboratorio en la tarjeta chica: SOLO se llena de texto cuando el
+   producto comparte nombre con otro (2 laboratorios distintos del mismo
+   ítem) — ver ui.js, buildCard(). El elemento se imprime siempre, vacío o
+   no, con altura fija de una línea (sin permitir que se corte en 2 renglones
+   con overflow/ellipsis) para que TODAS las tarjetas midan exactamente lo
+   mismo, tengan o no laboratorio visible. */
+.card-lab {
+  display: block;
+  height: 15px;
+  line-height: 15px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .card-footer {
   margin-top: 8px;
@@ -749,6 +792,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 @media (max-width: 560px) {
   .header-inner { padding: 24px 18px 14px; }
   .filter-row { padding: 0 18px 16px; }
+  .loading-products-banner { padding: 0 18px 14px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
