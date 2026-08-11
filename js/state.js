@@ -19,6 +19,14 @@ let searchTerm = "";
 // Color asignado a cada categoría (se arma en ui.js, buildCategoryChips)
 let categoryColorMap = {};
 
+// Nombres de producto que se repiten en más de un producto del catálogo
+// (mismo nombre, distinto laboratorio: son 2 tarjetas a propósito). Se
+// recalcula en data.js, computeDuplicateNames(), cada vez que se carga el
+// catálogo. ui.js lo usa para mostrar el laboratorio en la tarjeta chica
+// SOLO en estos casos puntuales, donde es lo único que distingue a un
+// producto del otro sin entrar al detalle.
+let duplicateProductNames = new Set();
+
 // El carrito/pedido: { claveDelProducto: { product, qty } }
 let cart = {};
 
@@ -42,6 +50,7 @@ function cacheElements() {
   els.labName = document.getElementById("lab-name");
   els.labSub = document.getElementById("lab-sub");
   els.logoImg = document.getElementById("brand-logo");
+  els.loadingBanner = document.getElementById("loading-products-banner");
 
   els.productModal = document.getElementById("product-modal");
   els.modalBody = document.getElementById("modal-body");
