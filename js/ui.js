@@ -24,7 +24,7 @@ function setupSearch() {
    Chips de categoría
    ------------------------------------------------------------------------ */
 function buildCategoryChips() {
-  const categories = [...new Set(allProducts.map((p) => p.category))].sort();
+  const categories = [...new Set(allProducts.flatMap((p) => p.categories))].sort();
   categoryColorMap = {};
   categories.forEach((c, i) => (categoryColorMap[c] = CATEGORY_COLORS[i % CATEGORY_COLORS.length]));
 
@@ -49,7 +49,7 @@ function buildCategoryChips() {
 // tiene, o se eligió "Todas", oculta ese panel.
 function updateSubcategoryChips(category) {
   const subcats = category
-    ? [...new Set(allProducts.filter((p) => p.category === category).map((p) => p.subcategory).filter(Boolean))].sort()
+    ? [...new Set(allProducts.filter((p) => p.categories.includes(category)).flatMap((p) => p.subcategories))].sort()
     : [];
 
   if (subcats.length === 0) {
@@ -157,13 +157,13 @@ function closeFilterPanel(toggleBtn, panelEl) {
    ------------------------------------------------------------------------ */
 function renderGrid() {
   const filtered = allProducts.filter((p) => {
-    if (activeCategory && p.category !== activeCategory) return false;
-    if (activeSubcategory && p.subcategory !== activeSubcategory) return false;
+    if (activeCategory && !p.categories.includes(activeCategory)) return false;
+    if (activeSubcategory && !p.subcategories.includes(activeSubcategory)) return false;
     if (activeLab && p.lab !== activeLab) return false;
     if (searchTerm) {
       // El código sigue siendo buscable (útil si alguien lo tipea de
       // memoria) aunque nunca se muestre en la tarjeta.
-      const haystack = `${p.name} ${p.category} ${p.subcategory} ${p.code} ${p.lab}`.toLowerCase();
+      const haystack = `${p.name} ${p.categories.join(" ")} ${p.subcategories.join(" ")} ${p.code} ${p.lab}`.toLowerCase();
       if (!haystack.includes(searchTerm)) return false;
     }
     return true;
@@ -199,7 +199,10 @@ function buildCard(p) {
  
   const strip = document.createElement("div");
   strip.className = "card-strip";
-  strip.style.background = categoryColorMap[p.category] || CATEGORY_COLORS[0];
+  // Si el producto tiene más de una categoría, la franja usa el color de
+  // la primera (es solo una referencia visual rápida, no hace falta que
+  // represente las dos a la vez).
+  strip.style.background = categoryColorMap[p.categories[0]] || CATEGORY_COLORS[0];
   card.appendChild(strip);
  
   const media = document.createElement("div");
@@ -212,8 +215,8 @@ function buildCard(p) {
   body.className = "card-body";
   body.innerHTML = `
     <h3 class="card-title">${escapeHtml(p.name)}</h3>
-    <span class="card-category">${escapeHtml(p.category)}</span>
-    ${p.subcategory ? `<span class="card-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
+    <span class="card-category">${escapeHtml(p.categories.join(", "))}</span>
+    ${p.subcategories.length ? `<span class="card-subcategory">${escapeHtml(p.subcategories.join(", "))}</span>` : ""}
     <div class="card-footer">${availabilityTagHtml(p)}</div>
   `;
   body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
@@ -334,8 +337,8 @@ function openProductModal(p) {
   info.className = "modal-info";
   info.innerHTML = `
     <h2 id="modal-title">${escapeHtml(p.name)}</h2>
-    <span class="modal-category">${escapeHtml(p.category)}</span>
-    ${p.subcategory ? `<span class="modal-subcategory">${escapeHtml(p.subcategory)}</span>` : ""}
+    <span class="modal-category">${escapeHtml(p.categories.join(", "))}</span>
+    ${p.subcategories.length ? `<span class="modal-subcategory">${escapeHtml(p.subcategories.join(", "))}</span>` : ""}
     <div class="modal-avail-row">${availabilityTagHtml(p)}</div>
     ${p.lab ? `<div class="modal-row"><span class="k">Laboratorio</span><span>${escapeHtml(p.lab)}</span></div>` : ""}
     ${p.description ? `<p class="modal-desc">${escapeHtml(p.description)}</p>` : ""}
@@ -412,7 +415,9 @@ function renderCartModal() {
     row.className = "cart-item";
     // Acá tampoco se muestra el código: la referencia visible para el
     // cliente es la categoría (o subcategoría, si tiene).
-    const metaText = entry.product.subcategory || entry.product.category;
+    const metaText = entry.product.subcategories.length
+      ? entry.product.subcategories.join(", ")
+      : entry.product.categories.join(", ");
     row.innerHTML = `
       <div class="cart-item-info">
         <div class="cart-item-name">${escapeHtml(entry.product.name)}</div>
