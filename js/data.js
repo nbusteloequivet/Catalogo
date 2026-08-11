@@ -5,9 +5,11 @@
    MAÑANA: si migrás a una base de datos/API propia, esta es la única
    función que tendrías que reemplazar (loadCatalog). Mientras siga
    completando "allProducts" con un array de objetos con esta misma forma
-   (name, category, subcategory, price, currency, hasIVA, code, lab,
+   (name, categories, subcategories, price, currency, hasIVA, code, lab,
    description, imageUrl, availability), el resto de la página (ui.js,
-   cart.js) no necesita cambiar nada.
+   cart.js) no necesita cambiar nada. "categories" y "subcategories" son
+   SIEMPRE arrays (aunque el producto tenga una sola categoría), porque un
+   producto puede pertenecer a más de una a la vez.
    ========================================================================= */
 
 function loadCatalog() {
@@ -69,10 +71,18 @@ function normalizeRow(rawRow) {
     row[normalizeHeader(key)] = (rawRow[key] ?? "").toString().trim();
   }
 
+  const categories = parseMultiValue(row[COLUMNS.category]);
+
   return {
     name: row[COLUMNS.name] || "",
-    category: row[COLUMNS.category] || "General",
-    subcategory: row[COLUMNS.subcategory] || "",
+    // Un producto puede pertenecer a más de una categoría/subcategoría:
+    // en la planilla se escriben separadas por coma en la misma celda
+    // (ej. "Descartables, Protección"), UNA SOLA fila por producto —
+    // así se evita la carga duplicada (mismo código, 2 filas) que antes
+    // generaba 2 tarjetas idénticas en el catálogo. Ver categories.js/ui.js
+    // para cómo se filtra y se muestra cuando hay más de una.
+    categories: categories.length ? categories : ["General"],
+    subcategories: parseMultiValue(row[COLUMNS.subcategory]),
     price: parsePrice(row[COLUMNS.price]),       // se lee, no se muestra al cliente
     currency: row[COLUMNS.currency] || "",        // se lee, no se muestra al cliente
     hasIVA: isIVA(row[COLUMNS.iva]),              // se lee, no se muestra al cliente
@@ -82,6 +92,15 @@ function normalizeRow(rawRow) {
     imageUrl: toDirectDriveUrl(row[COLUMNS.image]),
     availability: normalizeAvailability(row[COLUMNS.availability]),
   };
+}
+
+// "Descartables, Protección" -> ["Descartables", "Protección"]. También
+// funciona con un solo valor sin coma ("Descartables" -> ["Descartables"]),
+// así que una celda con una sola categoría sigue andando exactamente igual
+// que antes.
+function parseMultiValue(raw) {
+  if (!raw) return [];
+  return raw.split(",").map((v) => v.trim()).filter(Boolean);
 }
 
 function parsePrice(raw) {
@@ -121,9 +140,9 @@ function toDirectDriveUrl(url) {
 
 // Clave única por producto: preferimos el código (aunque no se muestre en
 // pantalla, sigue siendo el identificador más confiable); si no tiene,
-// usamos nombre+categoría.
+// usamos nombre+categorías.
 function productKey(p) {
-  return p.code ? `code:${p.code}` : `nc:${p.name}|${p.category}`;
+  return p.code ? `code:${p.code}` : `nc:${p.name}|${p.categories.join("|")}`;
 }
 
 /* ------------------------------------------------------------------------
@@ -131,8 +150,9 @@ function productKey(p) {
    falla la lectura.
    ------------------------------------------------------------------------ */
 const DEMO_PRODUCTS = [
-  { name: "Reactivo Buffer Fosfato PBS 1X", category: "Reactivos", subcategory: "Buffers", price: 8500, currency: "ARS", hasIVA: true, code: "RF-1042", lab: "BioLab SA", description: "Solución tamponadora estéril, pH 7.4, uso general en cultivo celular.", imageUrl: null, availability: "En stock" },
-  { name: "Tubos Falcon 15 ml", category: "Descartables", subcategory: "Tubos", price: 3200, currency: "ARS", hasIVA: false, code: "DS-2210", lab: "PlastiCiencia", description: "Tubos cónicos estériles con tapa a rosca, graduados.", imageUrl: null, availability: "En stock" },
-  { name: "Kit Extracción de ADN", category: "Kits", subcategory: "Genómica", price: 45200, currency: "USD", hasIVA: true, code: "KT-0091", lab: "GenTech", description: "Kit de columna para extracción de ADN genómico de muestras de tejido.", imageUrl: null, availability: "A pedido" },
-  { name: "Guantes de Nitrilo Talle M", category: "Descartables", subcategory: "Protección", price: 6100, currency: "ARS", hasIVA: false, code: "DS-3305", lab: "SafeHand", description: "Guantes sin polvo, resistentes a solventes.", imageUrl: null, availability: "En stock" },
+  { name: "Reactivo Buffer Fosfato PBS 1X", categories: ["Reactivos"], subcategories: ["Buffers"], price: 8500, currency: "ARS", hasIVA: true, code: "RF-1042", lab: "BioLab SA", description: "Solución tamponadora estéril, pH 7.4, uso general en cultivo celular.", imageUrl: null, availability: "En stock" },
+  { name: "Tubos Falcon 15 ml", categories: ["Descartables"], subcategories: ["Tubos"], price: 3200, currency: "ARS", hasIVA: false, code: "DS-2210", lab: "PlastiCiencia", description: "Tubos cónicos estériles con tapa a rosca, graduados.", imageUrl: null, availability: "En stock" },
+  { name: "Kit Extracción de ADN", categories: ["Kits"], subcategories: ["Genómica"], price: 45200, currency: "USD", hasIVA: true, code: "KT-0091", lab: "GenTech", description: "Kit de columna para extracción de ADN genómico de muestras de tejido.", imageUrl: null, availability: "A pedido" },
+  // Ejemplo de producto en 2 categorías a la vez (para probar el filtro sin necesidad de la planilla real).
+  { name: "Guantes de Nitrilo Talle M", categories: ["Descartables", "Protección"], subcategories: [], price: 6100, currency: "ARS", hasIVA: false, code: "DS-3305", lab: "SafeHand", description: "Guantes sin polvo, resistentes a solventes.", imageUrl: null, availability: "En stock" },
 ];
