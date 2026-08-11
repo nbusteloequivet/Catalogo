@@ -348,6 +348,17 @@ a { color: var(--accent); }
   border-top: 1.5px solid var(--ink);
 }
 
+/* Agrupa la línea divisoria + "En stock" + selector de cantidad + botón
+   "Agregar" en un solo bloque, y lo pega siempre al FONDO de la tarjeta
+   (margin-top: auto empuja todo el espacio libre hacia arriba de este
+   bloque). .card-body ya es un flex-column con flex:1 (ver más abajo), así
+   que esto funciona sin tocar nada de la imagen ni de los textos de
+   arriba — la línea queda siempre a la misma altura en toda la fila de la
+   grilla, sin importar si el producto tiene 1 o 3 categorías. */
+.card-bottom {
+  margin-top: auto;
+}
+
 /* Etiqueta "En stock" / "A pedido" — reemplaza al precio, que ya no se
    muestra al cliente (sigue existiendo en la planilla, solo no se lee acá). */
 .avail-tag {
@@ -656,6 +667,16 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   gap: 10px;
 }
 .modal-info h2 { font-family: var(--font-display); font-size: 25px; margin: 4px 0 0; }
+/* Agrupa categorías + subcategorías (una por renglón) en un solo bloque,
+   con su propio espaciado más ajustado que el "gap: 10px" general de
+   .modal-info — si no, cada categoría quedaría demasiado separada de la
+   siguiente. */
+.modal-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
 .modal-category, .modal-subcategory {
   font-family: var(--font-mono);
   font-size: 11px;
