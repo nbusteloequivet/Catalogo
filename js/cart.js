@@ -91,15 +91,21 @@ function prepareOrder() {
   const email = els.cartEmail.value.trim();
   const mensaje = els.cartMensaje.value.trim();
 
-  if (items.length === 0) {
-    showCartStatus("Todavía no agregaste ningún producto al pedido.", "error");
+  if (items.length === 0 && !mensaje) {
+    // Mientras el catálogo todavía no tiene cargados todos los productos
+    // (cartel rojo en el header), el cliente puede no encontrar nada para
+    // agregar — en ese caso el pedido igual es válido SI describió lo que
+    // necesita en "Mensaje adicional". Lo único que de verdad bloquea el
+    // envío es no tener ni productos agregados ni ese mensaje: ahí no
+    // sabríamos qué está pidiendo.
+    showCartStatus("Agregá productos al pedido o contanos en \"Mensaje adicional\" qué necesitás.", "error");
     return null;
   }
   if (!nombre || !apellido) {
     showCartStatus("Completá tus datos antes de enviar.", "error");
     return null;
   }
-  // WhatsApp, Email y Mensaje adicional son opcionales — no bloquean el envío.
+  // WhatsApp y Email son opcionales — no bloquean el envío.
 
   // ID simple para poder agrupar en la planilla todas las filas que
   // pertenecen a este mismo pedido (un timestamp alcanza: es único y
@@ -173,12 +179,19 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }
   if (whatsapp) lines.push(`WhatsApp: ${whatsapp}`);
   if (email) lines.push(`Email: ${email}`);
   lines.push("");
-  lines.push("Productos:");
-  items.forEach(({ product, qty }) => {
-    // El código sí va en el mail, aunque nunca se muestre en pantalla.
-    const codePart = product.code ? ` (${product.code})` : "";
-    lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
-  });
+  if (items.length > 0) {
+    lines.push("Productos:");
+    items.forEach(({ product, qty }) => {
+      // El código sí va en el mail, aunque nunca se muestre en pantalla.
+      const codePart = product.code ? ` (${product.code})` : "";
+      lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
+    });
+  } else {
+    // No agregó nada del catálogo (probablemente no encontró lo que
+    // buscaba, mientras todavía se está cargando) — todo lo que pidió
+    // está en el mensaje adicional, que abajo se imprime siempre.
+    lines.push("Productos: no encontró lo que buscaba en el catálogo — ver \"Mensaje adicional\".");
+  }
   if (mensaje) {
     lines.push("");
     lines.push("Mensaje adicional:");
