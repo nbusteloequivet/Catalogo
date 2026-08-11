@@ -213,10 +213,16 @@ function buildCard(p) {
  
   const body = document.createElement("div");
   body.className = "card-body";
+  // El renglón de laboratorio se imprime SIEMPRE (aunque quede vacío) para
+  // que la altura de la tarjeta no varíe según el producto — si solo lo
+  // agregáramos cuando corresponde, esas tarjetas puntuales quedarían más
+  // altas que el resto de la grilla.
+  const showLab = Boolean(p.lab) && duplicateProductNames.has(normalizeNameForCompare(p.name));
   body.innerHTML = `
     <h3 class="card-title">${escapeHtml(p.name)}</h3>
     <span class="card-category">${escapeHtml(p.categories.join(", "))}</span>
     ${p.subcategories.length ? `<span class="card-subcategory">${escapeHtml(p.subcategories.join(", "))}</span>` : ""}
+    <span class="card-lab">${showLab ? escapeHtml(p.lab) : ""}</span>
     <div class="card-footer">${availabilityTagHtml(p)}</div>
   `;
   body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
