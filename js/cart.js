@@ -1,16 +1,17 @@
 /* =========================================================================
    CART.JS — Lógica del pedido (el "carrito").
 
-   Este archivo hace DOS cosas cuando el cliente envía un presupuesto:
-   1) Arma un mail y abre Gmail con todo cargado (como hasta ahora).
-   2) Manda una copia estructurada de esos mismos datos a una planilla de
-      Google ("Pedidos"), para ir armando de a poco una base de datos que
-      después sirva para ver qué se vende más, controlar stock, etc.
+   Al enviar un presupuesto, el pedido se manda directo al Apps Script
+   (submitOrderToServer): ese script hace las DOS cosas del lado de
+   Google — guarda la fila en la planilla "Pedidos" Y manda el mail de
+   notificación (MailApp) — sin que el cliente tenga que abrir ni tocar
+   nada más.
 
-   La parte 2 es siempre "best effort": si por lo que sea falla (Google
-   caído, sin internet un instante, lo que sea), el mail se manda igual —
-   nunca deben depender una de la otra. El registro en la base es un
-   extra silencioso, no un requisito para que el pedido llegue.
+   Plan B, solo si esa llamada llega a fallar de verdad (sin internet, el
+   Apps Script caído): recién ahí se cae al método de siempre, abrir
+   Gmail con todo cargado para que el cliente lo mande él mismo. Por eso
+   ese código (openGmailComposeUrl y compañía) sigue estando acá, aunque
+   ya no sea el camino principal.
    ========================================================================= */
 
 function safeInt(value) {
@@ -60,19 +61,14 @@ function clearCart() {
 }
 
 /* ------------------------------------------------------------------------
-   Envío de la cotización — sin backend propio, pero SIN depender de que
-   la computadora tenga un programa de mail instalado (mailto: requiere
-   eso, y hoy casi nadie lo tiene). En cambio, se abre directamente la
-   ventana de redactar de Gmail (en el navegador, o la app si el sistema
-   la abre sola — ver detalle más abajo), con destinatario, asunto y
-   cuerpo ya completos. No hace falta copiar ni pegar nada.
+   Plan B — abrir Gmail con todo cargado, SIN depender de que la
+   computadora tenga un programa de mail instalado (mailto: requiere eso,
+   y hoy casi nadie lo tiene). Esto ya NO es el camino principal (ver
+   openGmailCompose más abajo): solo se usa si submitOrderToServer llega
+   a fallar de verdad.
 
    El asunto es SIEMPRE el mismo (CONFIG.ORDER_EMAIL_SUBJECT), así en tu
-   casilla podés agrupar/filtrar todas las cotizaciones juntas. Aclaración
-   honesta: como el cliente termina en una ventana de redacción real,
-   técnicamente podría cambiar el asunto antes de tocar enviar — no hay
-   forma de impedirlo del todo sin un servidor propio que mande el mail
-   por vos —, pero por defecto le va a llegar siempre así.
+   casilla podés agrupar/filtrar todas las cotizaciones juntas.
 
    El código de producto (product.code) NO se muestra en ningún lado de la
    página, pero sí viaja en el mail y en el registro de la base de datos —
@@ -215,17 +211,27 @@ function openEmailContact(to, subject, body) {
   }
 }
 
-function openGmailCompose() {
+async function openGmailCompose() {
   const order = prepareOrder();
   if (order === null) return;
 
+  els.sendGmailBtn.disabled = true;
+  showCartStatus("Enviando tu pedido…", "success");
+
+  const enviado = await submitOrderToServer(order);
+
+  els.sendGmailBtn.disabled = false;
+
+  if (enviado) {
+    showCartStatus("¡Listo! Tu pedido fue enviado.", "success");
+    return;
+  }
+
+  // Plan B: solo llegamos acá si el envío directo falló de verdad (sin
+  // internet, el Apps Script caído). Ahí sí, como respaldo, abrimos
+  // Gmail con todo cargado para que el cliente lo mande él mismo.
   openGmailComposeUrl(CONFIG.ORDER_EMAIL, CONFIG.ORDER_EMAIL_SUBJECT, order.message);
-
-  showCartStatus("Se abrió Gmail con el pedido ya cargado. Revisalo y tocá enviar desde ahí.", "success");
-
-  // Registro en la base de datos: siempre en paralelo, nunca bloquea ni
-  // condiciona lo de arriba (ver logOrderToDatabase).
-  logOrderToDatabase(order);
+  showCartStatus("No pudimos enviarlo automáticamente — se abrió Gmail con tu pedido cargado. Revisalo y tocá enviar desde ahí.", "error");
 }
 
 function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }) {
@@ -259,35 +265,43 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }
 }
 
 /* ------------------------------------------------------------------------
-   Registro en la base de datos (planilla "Pedidos")
-
-   Manda los datos del pedido a un Google Apps Script (ver README para
-   cómo configurarlo) que agrega una fila por cada producto pedido, todas
-   compartiendo el mismo "orderId" para poder agruparlas después.
+   Envío directo al Apps Script — guarda el pedido en la planilla
+   "Pedidos" Y manda el mail de notificación, las dos cosas del lado de
+   Google (ver Código.gs). Acá solo armamos el payload y lo mandamos.
 
    Detalles técnicos, por si hay que tocar esto en el futuro:
    - fetch con mode:"no-cors": Apps Script no siempre devuelve los
      encabezados que un navegador necesita para "leer" la respuesta desde
-     JavaScript. Como acá no necesitamos leer nada de vuelta (solo que la
-     fila se guarde), no-cors evita ese problema — a cambio, nunca vamos a
-     poder saber desde acá si realmente funcionó o no. Por diseño: si
-     falla, no le mostramos ningún error al cliente (su pedido ya se
-     mandó bien por mail, que es lo que realmente le importa).
+     JavaScript. Como consecuencia, NO podemos leer desde acá si el mail
+     se mandó o si se guardó bien la fila — solo sabemos si la llamada en
+     sí se pudo hacer (hubo internet, el Apps Script respondió algo). Por
+     eso el Apps Script valida y sanea todo del otro lado: no podemos
+     confiar en lo que ve el cliente para decidir qué es seguro guardar.
    - Content-Type: text/plain (en vez de application/json): Apps Script no
      responde bien a la petición de verificación previa ("preflight") que
      hacen los navegadores antes de mandar JSON real entre dominios
      distintos. Mandándolo como texto plano se evita ese problema, y del
      otro lado (en el Apps Script) igual se interpreta como JSON.
+   - siteToken / honeypot: dos capas de protección contra abuso — ver el
+     comentario al principio de Código.gs para el detalle de cada una.
+
+   Devuelve true si la llamada se pudo hacer (asumimos que el pedido
+   llegó bien), o false si el fetch en sí falló (sin internet, el
+   Apps Script inaccesible) — solo en ese caso openGmailCompose() cae al
+   plan B de abrir Gmail.
    ------------------------------------------------------------------------ */
-function logOrderToDatabase(order) {
+async function submitOrderToServer(order) {
   if (!CONFIG.ORDERS_SHEET_WEBAPP_URL || CONFIG.ORDERS_SHEET_WEBAPP_URL.includes("PEGAR_AQUI")) {
-    // Todavía no se configuró la base de datos — se ignora en silencio,
-    // no tiene sentido molestar al cliente por algo que es 100% nuestro.
-    console.warn("CONFIG.ORDERS_SHEET_WEBAPP_URL no está configurada: el pedido no se registró en la planilla (el mail sí se mandó).");
-    return;
+    console.warn("CONFIG.ORDERS_SHEET_WEBAPP_URL no está configurada: no se pudo enviar el pedido.");
+    return false;
   }
 
   const payload = {
+    siteToken: CONFIG.SITE_TOKEN,
+    // Campo trampa: en un cliente real esto SIEMPRE llega vacío (el
+    // input está oculto de la vista). Si un bot lo completó, viaja con
+    // contenido y el Apps Script descarta el pedido sin procesarlo.
+    honeypot: els.cartHoneypot ? els.cartHoneypot.value.trim() : "",
     orderId: order.orderId,
     nombre: order.nombre,
     entidad: order.apellido, // "apellido" es en realidad el campo Entidad del formulario
@@ -305,15 +319,15 @@ function logOrderToDatabase(order) {
   };
 
   try {
-    fetch(CONFIG.ORDERS_SHEET_WEBAPP_URL, {
+    await fetch(CONFIG.ORDERS_SHEET_WEBAPP_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload),
-    }).catch((err) => {
-      console.warn("No se pudo registrar el pedido en la planilla (el mail se mandó igual):", err);
     });
+    return true;
   } catch (err) {
-    console.warn("No se pudo registrar el pedido en la planilla (el mail se mandó igual):", err);
+    console.warn("No se pudo enviar el pedido (sin conexión o el Apps Script no respondió):", err);
+    return false;
   }
 }
