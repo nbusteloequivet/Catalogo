@@ -466,6 +466,9 @@ function setupCartModal() {
   els.cartFab.addEventListener("click", () => {
     renderCartModal();
     openModalEl(els.cartModal);
+    // El modal recién ahora es visible de verdad — recién ahora se puede
+    // medir su alto correctamente (ver el comentario en autoGrowTextarea).
+    autoGrowTextarea(els.cartMensaje);
   });
  
   els.clearCartBtn.addEventListener("click", () => {
@@ -540,14 +543,23 @@ function hideCartStatus() {
    quedaba raro — ver el resize:none puesto en style.css). No tiene techo:
    por más que escriba mucho, el cuadro sigue agrandándose sin cortar
    texto ni mostrar scroll interno.
+
+   OJO con un detalle importante: esto NO se puede calcular bien mientras
+   el modal del carrito está oculto — un elemento escondido (display:none,
+   que es lo que pone el atributo "hidden" del modal) siempre mide alto 0,
+   así que si se calculara en ese momento el cuadro quedaría con altura 0
+   pegada para siempre (eso fue el bug: el texto de adentro se veía
+   cortado). Por eso acá SOLO se engancha el recálculo a medida que se
+   escribe — el recálculo inicial, con el modal ya visible de verdad, se
+   dispara aparte desde setupCartModal() cada vez que se abre el modal.
    ------------------------------------------------------------------------ */
+function autoGrowTextarea(textareaEl) {
+  textareaEl.style.height = "auto";
+  textareaEl.style.height = textareaEl.scrollHeight + "px";
+}
+
 function setupAutoGrowTextarea(textareaEl) {
-  const resize = () => {
-    textareaEl.style.height = "auto";
-    textareaEl.style.height = textareaEl.scrollHeight + "px";
-  };
-  textareaEl.addEventListener("input", resize);
-  resize(); // altura correcta si ya viene con texto (ej. al reabrir el modal)
+  textareaEl.addEventListener("input", () => autoGrowTextarea(textareaEl));
 }
 
 /* ------------------------------------------------------------------------
