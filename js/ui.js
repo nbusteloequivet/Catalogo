@@ -171,6 +171,7 @@ function renderGrid() {
  
   els.grid.innerHTML = "";
   cartIndicatorEls = {};
+  addButtonEls = {};
  
   if (filtered.length === 0) {
     els.emptyState.hidden = false;
@@ -253,6 +254,36 @@ function buildCard(p) {
   return card;
 }
  
+// Estado "pendiente" del botón: "Agregar" si el producto todavía no está
+// en el pedido, "Modificar" si ya está (el cliente está por cambiar la
+// cantidad de algo que ya había agregado). Se usa tanto al construir la
+// tarjeta como cada vez que hay que volver atrás desde "Agregado" o
+// "Modificado" (porque el cliente tocó +/-, escribió una cantidad nueva,
+// o el producto se sacó del pedido desde otro lado).
+function setAddButtonIdle(btn, key) {
+  btn.classList.remove("is-done");
+  btn.textContent = cart[key] ? "Modificar" : "Agregar";
+}
+
+// Estado "confirmado": "Agregado" la primera vez que el producto entra al
+// pedido, "Modificado" las veces siguientes que se confirma un cambio de
+// cantidad sobre un producto que ya estaba — mismo color en los dos
+// casos, como pediste.
+function setAddButtonDone(btn, wasInCart) {
+  btn.classList.add("is-done");
+  btn.textContent = wasInCart ? "Modificado" : "Agregado";
+}
+
+// Se llama desde cart.js cuando el producto se saca del pedido por otra
+// vía que no sea este mismo botón (el ✕ del carrito, o "Vaciar pedido"),
+// para que la tarjeta no se quede mostrando "Agregado"/"Modificado" de un
+// producto que en realidad ya no está en el pedido.
+function resetAddButton(key) {
+  const btn = addButtonEls[key];
+  if (!btn) return;
+  setAddButtonIdle(btn, key);
+}
+
 // Controles de cantidad + botón "Agregar" (reutilizados en tarjeta y modal)
 function buildCartRow(p, key) {
   const wrapper = document.createElement("div");
@@ -282,30 +313,47 @@ function buildCartRow(p, key) {
  
   const stopBubble = (fn) => (e) => { e.stopPropagation(); fn(e); };
  
-  minusBtn.addEventListener("click", stopBubble(() => {
-    qtyInput.value = Math.max(0, safeInt(qtyInput.value) - 1);
-  }));
-  plusBtn.addEventListener("click", stopBubble(() => {
-    qtyInput.value = safeInt(qtyInput.value) + 1;
-  }));
-  qtyInput.addEventListener("click", (e) => e.stopPropagation());
- 
-  qtyControl.append(minusBtn, qtyInput, plusBtn);
- 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "add-btn";
-  addBtn.textContent = "Agregar";
+  setAddButtonIdle(addBtn, key); // "Agregar" si es nuevo, "Modificar" si ya estaba en el pedido
+
+  // Cada vez que el cliente toca +/- o escribe una cantidad nueva, si el
+  // botón estaba mostrando "Agregado"/"Modificado" (un cambio ya
+  // confirmado), vuelve a pedir confirmación con "Modificar" — ese
+  // cambio todavía no se mandó al pedido hasta que lo vuelva a tocar.
+  const onQtyChanged = () => {
+    if (addBtn.classList.contains("is-done")) setAddButtonIdle(addBtn, key);
+  };
+
+  minusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = Math.max(0, safeInt(qtyInput.value) - 1);
+    onQtyChanged();
+  }));
+  plusBtn.addEventListener("click", stopBubble(() => {
+    qtyInput.value = safeInt(qtyInput.value) + 1;
+    onQtyChanged();
+  }));
+  qtyInput.addEventListener("click", (e) => e.stopPropagation());
+  qtyInput.addEventListener("input", onQtyChanged);
+ 
+  qtyControl.append(minusBtn, qtyInput, plusBtn);
+ 
   addBtn.addEventListener("click", stopBubble(() => {
     const qty = safeInt(qtyInput.value);
     if (qty <= 0) {
+      // removeFromCart ya deja el botón en "Agregar" (ver resetAddButton
+      // en cart.js) — no hace falta tocarlo de nuevo acá.
       removeFromCart(key);
     } else {
+      const wasInCart = Boolean(cart[key]);
       addToCart(p, key, qty);
+      setAddButtonDone(addBtn, wasInCart);
     }
   }));
  
   wrapper.append(qtyControl, addBtn);
+  addButtonEls[key] = addBtn;
  
   const indicatorEl = document.createElement("div");
   indicatorEl.className = "cart-indicator";
@@ -524,7 +572,7 @@ function setupCompanyContact() {
   els.contactGmail.href = "#";
   els.contactGmail.addEventListener("click", (e) => {
     e.preventDefault();
-    openGmailComposeUrl(CONFIG.COMPANY_EMAIL, "", "");
+    openEmailContact(CONFIG.COMPANY_EMAIL, "", "");
   });
   els.contactGmailValue.textContent = CONFIG.COMPANY_EMAIL;
  
