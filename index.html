@@ -65,13 +65,6 @@
     </div>
   </div>
 
-  <!-- Aviso temporal: se muestra/oculta con CONFIG.SHOW_LOADING_BANNER en
-       js/config.js (nada que tocar acá ni en el CSS). Cuando ya esté
-       cargado el catálogo completo, alcanza con poner ese valor en false. -->
-  <div id="loading-products-banner" class="loading-products-banner" hidden>
-    <p>Estamos cargando productos en la página. Si algún producto falta, escribinos el producto y la cantidad que requerís en la casilla "Mensaje adicional" en el apartado "Mi presupuesto". Disculpe las molestias.</p>
-  </div>
-
   <div class="filter-row">
     <input type="text" id="search-input" placeholder="Buscar producto, categoría o laboratorio…" autocomplete="off">
     <div class="filter-toggles">
@@ -97,6 +90,16 @@
   <div id="catalog-grid" class="catalog-grid"></div>
   <div id="empty-state" class="empty-state" hidden>
     <p>No hay productos que coincidan con la búsqueda.</p>
+  </div>
+
+  <!-- Aviso temporal: se muestra/oculta con CONFIG.SHOW_LOADING_BANNER en
+       js/config.js (nada que tocar acá ni en el CSS). Cuando ya esté
+       cargado el catálogo completo, alcanza con poner ese valor en false.
+       A propósito va DESPUÉS de la grilla (no en el header): así el
+       cliente ve primero los productos y recién al final, antes de
+       Contacto, el aviso de que puede faltar alguno. -->
+  <div id="loading-products-banner" class="loading-products-banner" hidden>
+    <p>Estamos cargando productos en la página. Si algún producto falta, escribinos el producto y la cantidad que requerís en la casilla "Mensaje adicional" en el apartado "Mi presupuesto". Disculpe las molestias.</p>
   </div>
 
   <!-- Datos de contacto de la empresa, al final del catálogo -->
