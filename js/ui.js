@@ -487,6 +487,22 @@ function hideCartStatus() {
 }
  
 /* ------------------------------------------------------------------------
+   Textarea de "Mensaje adicional": crece solo hacia abajo a medida que el
+   cliente escribe (en vez de dejarlo arrastrar la esquina a mano, que
+   quedaba raro — ver el resize:none puesto en style.css). No tiene techo:
+   por más que escriba mucho, el cuadro sigue agrandándose sin cortar
+   texto ni mostrar scroll interno.
+   ------------------------------------------------------------------------ */
+function setupAutoGrowTextarea(textareaEl) {
+  const resize = () => {
+    textareaEl.style.height = "auto";
+    textareaEl.style.height = textareaEl.scrollHeight + "px";
+  };
+  textareaEl.addEventListener("input", resize);
+  resize(); // altura correcta si ya viene con texto (ej. al reabrir el modal)
+}
+
+/* ------------------------------------------------------------------------
    Botón "Contacto": baja a la sección de contacto al final de la página.
    ------------------------------------------------------------------------ */
 function setupContactFab() {
