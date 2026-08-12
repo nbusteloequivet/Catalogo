@@ -101,11 +101,11 @@ function prepareOrder() {
     showCartStatus("Agregá productos al pedido o contanos en \"Mensaje adicional\" qué necesitás.", "error");
     return null;
   }
-  if (!nombre || !apellido) {
+  if (!nombre || !whatsapp || !email) {
     showCartStatus("Completá tus datos antes de enviar.", "error");
     return null;
   }
-  // WhatsApp y Email son opcionales — no bloquean el envío.
+  // Entidad es opcional — no bloquea el envío.
 
   // ID simple para poder agrupar en la planilla todas las filas que
   // pertenecen a este mismo pedido (un timestamp alcanza: es único y
@@ -175,9 +175,10 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }
   const lines = [];
   lines.push(`Pedido - ${CONFIG.LAB_NAME}`);
   lines.push("");
-  lines.push(`Cliente: ${nombre} ${apellido}`);
-  if (whatsapp) lines.push(`WhatsApp: ${whatsapp}`);
-  if (email) lines.push(`Email: ${email}`);
+  lines.push(`Cliente: ${nombre}`);
+  if (apellido) lines.push(`Entidad: ${apellido}`);
+  lines.push(`WhatsApp: ${whatsapp}`);
+  lines.push(`Email: ${email}`);
   lines.push("");
   if (items.length > 0) {
     lines.push("Productos:");
