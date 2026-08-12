@@ -760,7 +760,13 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   border-radius: 3px;
   color: var(--ink);
   font-weight: 400;
-  resize: vertical;
+}
+/* El cliente ya no puede arrastrar la esquina para agrandar/achicar el
+   cuadro a mano (quedaba raro) — en su lugar, cart.js lo agranda solo
+   hacia abajo a medida que escribe (ver setupAutoGrowTextarea). */
+.cart-form textarea {
+  resize: none;
+  overflow: hidden;
 }
 .cart-form input:focus-visible, .cart-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
