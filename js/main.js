@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilterToggles();
   setupModalClosers();
   setupCartModal();
+  setupAutoGrowTextarea(els.cartMensaje);
   setupContactFab();
   setupCompanyContact();
 
