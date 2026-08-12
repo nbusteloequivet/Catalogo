@@ -63,11 +63,17 @@ const CONFIG = {
   // ---- Base de datos de pedidos (planilla "Pedidos") ----
   // URL del Google Apps Script publicado como "Web App" (ver README para
   // el paso a paso de cómo generarla). Cada vez que alguien envía un
-  // presupuesto, además del mail, se manda una copia de los datos acá
-  // para ir guardando un historial de pedidos en la planilla. Si esto
-  // falla por lo que sea, el mail se manda igual — nunca depende uno
-  // del otro.
+  // presupuesto, el mismo Apps Script guarda el pedido en la planilla Y
+  // manda el mail de notificación — ya no lo hace el navegador del
+  // cliente (ver cart.js).
   ORDERS_SHEET_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbzh_Ync4bQOfKprLcN4faM6cn04MMfZoegSFYPH8TVwvLSxJbJ3s5uRphAX-Th2MjPK4Q/exec",
+
+  // Tiene que ser IDÉNTICO al valor de SITE_TOKEN en el Apps Script
+  // (Código.gs). No reemplaza una autenticación real — es un filtro
+  // contra quien encuentre la URL de arriba "de casualidad" sin conocer
+  // la forma exacta del pedido. Si algún día sospechás abuso, cambiá
+  // este valor Y el del script a la vez.
+  SITE_TOKEN: "1c7e2b5dc670c3cb81aa065924075f322e5bc502",
 };
 
 /* Colores para distinguir categorías a simple vista (franja + chip activo). */
