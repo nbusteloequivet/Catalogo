@@ -104,11 +104,15 @@ a { color: var(--accent); }
    Deliberadamente en rojo/de alerta — distinto del banner de estado del
    catálogo (.status-banner, violeta/neutro) para que se note que es un
    aviso al cliente y no un mensaje técnico. Se activa/desactiva desde
-   CONFIG.SHOW_LOADING_BANNER (js/config.js), no hace falta tocar esto. */
+   CONFIG.SHOW_LOADING_BANNER (js/config.js), no hace falta tocar esto.
+   Vive entre el final de la grilla y la línea divisoria de Contacto (ver
+   index.html) — el margin-top de acá es lo que lo separa de la última
+   fila de productos; la separación de la línea divisoria de abajo ya la
+   pone .company-contact con su propio margin-top/padding-top. */
 .loading-products-banner {
   max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 28px 18px;
+  margin: 28px auto 0;
+  padding: 0 28px;
 }
 .loading-products-banner p {
   margin: 0;
@@ -423,6 +427,12 @@ a { color: var(--accent); }
   transition: background-color 0.15s ease;
 }
 .add-btn:hover { background: var(--accent); }
+
+/* Estado "Agregado" / "Modificado": mismo violeta que ya usa el resto de
+   la página para indicar algo activo/confirmado (chips seleccionados,
+   "En stock", laboratorio destacado en la tarjeta) — mismo color y
+   formato en los dos casos, tal como se pidió. */
+.add-btn.is-done { background: var(--accent); }
 
 .cart-indicator {
   font-family: var(--font-mono);
@@ -819,7 +829,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 @media (max-width: 560px) {
   .header-inner { padding: 24px 18px 14px; }
   .filter-row { padding: 0 18px 16px; }
-  .loading-products-banner { padding: 0 18px 14px; }
+  .loading-products-banner { margin-top: 20px; padding: 0 18px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
