@@ -34,6 +34,13 @@ let cart = {};
 // sin reconstruir toda la grilla cada vez que cambia el carrito.
 let cartIndicatorEls = {};
 
+// Referencias a los botones "Agregar/Agregado/Modificar/Modificado" de
+// cada tarjeta, para poder devolverlos a su estado inicial cuando el
+// producto se saca del carrito desde otro lado (el ✕ del carrito, o
+// "Vaciar pedido") sin reconstruir toda la grilla. Mismo patrón que
+// cartIndicatorEls de arriba.
+let addButtonEls = {};
+
 // Cache de elementos del DOM (se completa una sola vez en main.js)
 const els = {};
 
