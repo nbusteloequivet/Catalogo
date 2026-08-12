@@ -28,6 +28,7 @@ function removeFromCart(key) {
   delete cart[key];
   updateCartIndicator(key);
   updateCartFabCount();
+  resetAddButton(key);
   renderCartModal();
 }
 
@@ -53,6 +54,7 @@ function updateCartFabCount() {
 function clearCart() {
   cart = {};
   Object.keys(cartIndicatorEls).forEach(updateCartIndicator);
+  Object.keys(addButtonEls).forEach(resetAddButton);
   updateCartFabCount();
   renderCartModal();
 }
@@ -120,20 +122,61 @@ function prepareOrder() {
 function isAndroidDevice() {
   return /android/i.test(navigator.userAgent);
 }
+function isIOSDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
 function isMobileDevice() {
-  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  return isAndroidDevice() || isIOSDevice();
+}
+
+// Cuánto esperamos, en iPhone, a ver si la app de Gmail tomó el control
+// de la pantalla antes de asumir que no está instalada y caer a la web.
+const IOS_APP_OPEN_TIMEOUT_MS = 900;
+
+// En iPhone/iPad no alcanza con navegar a la versión web de Gmail (eso
+// es justamente lo que abría "Gmail en el buscador" en vez de la app).
+// "googlegmail:///co?..." es el esquema propio que usa la app de Gmail
+// para abrir directo una pantalla de redacción ya completa. Si la app no
+// está instalada, este link no hace nada (no tira error, simplemente no
+// pasa nada) — por eso programamos una caída a la versión web recién
+// después de esperar un instante y confirmar que seguimos en la página.
+function openGmailIOS(to, subject, body) {
+  const toParam = encodeURIComponent(to);
+  const subjectParam = encodeURIComponent(subject || "");
+  const bodyParam = encodeURIComponent(body || "");
+  const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toParam}&su=${subjectParam}&body=${bodyParam}`;
+  const appUrl = `googlegmail:///co?to=${toParam}&subject=${subjectParam}&body=${bodyParam}`;
+
+  let appTookOver = false;
+
+  // Si la app SÍ abrió, Safari pasa a segundo plano y esto se dispara —
+  // ahí cancelamos la caída a la web para no mandar también ahí cuando
+  // el cliente vuelva a Safari después de mandar el mail desde la app.
+  function onVisibilityChange() {
+    if (document.hidden) appTookOver = true;
+  }
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  window.location.href = appUrl;
+
+  setTimeout(() => {
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    if (!appTookOver) {
+      // Pasado el tiempo de espera seguimos en la página: la app de
+      // Gmail no está instalada. Recién acá caemos a la versión web.
+      window.location.href = webUrl;
+    }
+  }, IOS_APP_OPEN_TIMEOUT_MS);
 }
 
 // Abre la redacción de Gmail con destinatario/asunto/cuerpo ya cargados,
-// adaptado al dispositivo. La usan tanto el envío del presupuesto
-// (más abajo) como el botón de Email de la sección Contacto (ui.js).
+// SIEMPRE en Gmail específicamente (app en el celular, Gmail web en la
+// compu). La usa el botón "Enviar por Gmail" del presupuesto, y también
+// el botón de Contacto en el celular (ver openEmailContact más abajo).
 function openGmailComposeUrl(to, subject, body) {
   const toParam = encodeURIComponent(to);
   const subjectParam = encodeURIComponent(subject || "");
   const bodyParam = encodeURIComponent(body || "");
-
-  // Link "de siempre": funciona bien en PC y en iPhone (ahí, si tiene la
-  // app de Gmail, Safari la ofrece igual con el texto cargado).
   const webUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toParam}&su=${subjectParam}&body=${bodyParam}`;
 
   if (isAndroidDevice()) {
@@ -148,13 +191,27 @@ function openGmailComposeUrl(to, subject, body) {
       `#Intent;scheme=mailto;package=com.google.android.gm;` +
       `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
     window.location.href = intentUrl;
-  } else if (isMobileDevice()) {
-    // iPhone: una navegación directa es más confiable que abrir una
-    // pestaña nueva para que el sistema ofrezca la app correctamente.
-    window.location.href = webUrl;
+  } else if (isIOSDevice()) {
+    openGmailIOS(to, subject, body);
   } else {
     // PC: pestaña nueva, así no se pierde el catálogo/la página de fondo.
     window.open(webUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+// Botón "Email" de la sección Contacto (index.html lo muestra como
+// "Email", no como "Gmail" — a propósito no fuerza Gmail en la compu).
+// En el celular sí abre puntualmente la app de Gmail (mismo mecanismo de
+// arriba). En la computadora usa un "mailto:" común: el sistema operativo
+// decide qué programa de mail abrir (Gmail si está asociado, Outlook,
+// Mail de Windows/Mac, lo que el cliente tenga configurado).
+function openEmailContact(to, subject, body) {
+  if (isMobileDevice()) {
+    openGmailComposeUrl(to, subject, body);
+  } else {
+    const subjectParam = encodeURIComponent(subject || "");
+    const bodyParam = encodeURIComponent(body || "");
+    window.location.href = `mailto:${to}?subject=${subjectParam}&body=${bodyParam}`;
   }
 }
 
