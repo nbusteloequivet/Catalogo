@@ -184,6 +184,19 @@
         <label>Mensaje adicional (opcional)
           <textarea id="cart-mensaje" rows="3" placeholder="si algún producto no lo encontraste en el catalogo, por favor detallanos en tu mensaje y te ponemos el producto o alternativa"></textarea>
         </label>
+
+        <!-- Campo trampa anti-spam: invisible para un cliente real (ver
+             .honeypot-field en style.css). Algunos bots que completan
+             formularios automáticamente lo llenan igual — si llega
+             completo, el pedido se descarta en el Apps Script sin
+             procesarse. No lleva type="hidden" a propósito: los bots más
+             básicos lo saltean si lo detectan así. tabindex="-1" y
+             aria-hidden lo sacan de la navegación por teclado y de
+             lectores de pantalla, para no molestar a nadie real. -->
+        <label class="honeypot-field" aria-hidden="true">
+          Sitio web
+          <input id="cart-honeypot" type="text" tabindex="-1" autocomplete="off">
+        </label>
       </div>
 
       <div id="cart-status" class="cart-status" hidden></div>
