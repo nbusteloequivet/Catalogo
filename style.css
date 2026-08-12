@@ -762,6 +762,19 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 
 .cart-form { display: flex; flex-direction: column; gap: 10px; border-top: 1.5px solid var(--ink); padding-top: 16px; }
 .cart-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-soft); font-weight: 600; }
+
+/* Campo trampa anti-spam (ver index.html): oculto "de forma accesible" —
+   fuera de la pantalla con posicionamiento absoluto, en vez de
+   display:none. Un display:none es algo que los bots más simples
+   también detectan y saltean a propósito; así, en cambio, el campo
+   sigue "presente" para un bot que llena todo indiscriminadamente. */
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 .cart-form input, .cart-form textarea {
   font-family: var(--font-body);
   font-size: 14px;
@@ -807,6 +820,12 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   color: #fff;
 }
 .btn-provider:hover { background: var(--accent); border-color: var(--accent); }
+.btn-provider:disabled {
+  opacity: 0.6;
+  cursor: default;
+  background: var(--ink);
+  border-color: var(--ink);
+}
 
 .cart-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn-primary, .btn-secondary {
