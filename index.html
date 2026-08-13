@@ -8,6 +8,13 @@
 <meta name="description" content="EquiVet es un laboratorio especializado en reproducción equina en Los Cardales, Buenos Aires. Consultá nuestro catálogo de productos y pedí tu cotización online.">
 <link rel="canonical" href="https://nbusteloequivet.github.io/Catalogo/">
 
+<!-- Si algún recurso llegara a referenciarse por error con "http://" en
+     vez de "https://", el navegador lo sube solo a https antes de
+     pedirlo. No restringe nada de lo que ya funciona (no bloquea
+     cdnjs, Google Fonts, Drive, Maps ni el Apps Script) — es una red de
+     seguridad extra, sin riesgo de romper nada existente. -->
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
 <!-- Open Graph: cómo se ve el link al compartirlo en WhatsApp, Instagram, etc. -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_AR">
@@ -212,7 +219,7 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/data.js"></script>
