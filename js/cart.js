@@ -64,7 +64,7 @@ function clearCart() {
    Plan B — abrir Gmail con todo cargado, SIN depender de que la
    computadora tenga un programa de mail instalado (mailto: requiere eso,
    y hoy casi nadie lo tiene). Esto ya NO es el camino principal (ver
-   openGmailCompose más abajo): solo se usa si submitOrderToServer llega
+   sendOrder más abajo): solo se usa si submitOrderToServer llega
    a fallar de verdad.
 
    El asunto es SIEMPRE el mismo (CONFIG.ORDER_EMAIL_SUBJECT), así en tu
@@ -79,6 +79,25 @@ function clearCart() {
 // objeto. Si falta algo, muestra el error y devuelve null. Tanto el
 // envío del mail como el registro en la base de datos parten de acá, así
 // los dos usan siempre exactamente los mismos datos.
+// Mismo criterio EXACTO que usa Código.gs para el email (ver
+// esEmailValido_ allá) — a propósito la misma regla en los dos lados: si
+// algún día se relaja o se ajusta una, hay que ajustar la otra igual,
+// para que nunca pase que la página deje mandar algo que el script del
+// otro lado va a terminar rechazando en silencio.
+function esEmailValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// WhatsApp: a propósito NO exigimos un formato estricto (con o sin "+54",
+// con o sin espacios/guiones, clientes de otros países) — solo un mínimo
+// de dígitos reales, para atajar el caso de alguien tipeando cualquier
+// cosa por error, sin arriesgarnos a rechazar un número real por ser
+// "raro".
+function esWhatsappValido(whatsapp) {
+  const digits = whatsapp.replace(/\D/g, "");
+  return digits.length >= 8 && digits.length <= 15;
+}
+
 function prepareOrder() {
   hideCartStatus();
 
@@ -101,6 +120,19 @@ function prepareOrder() {
   }
   if (!nombre || !whatsapp || !email) {
     showCartStatus("Completá tus datos antes de enviar.", "error");
+    return null;
+  }
+  // Formato de email: se valida ACÁ, antes de intentar mandar nada.
+  // Código.gs también lo valida del otro lado, pero como el envío usa
+  // "no-cors" no hay forma de leer si lo rechazó — si dejáramos pasar un
+  // email con mala forma, el pedido se perdería en silencio y la página
+  // igual le mostraría "enviado" al cliente. Cortarlo acá evita eso.
+  if (!esEmailValido(email)) {
+    showCartStatus("El email no parece válido — revisalo antes de enviar.", "error");
+    return null;
+  }
+  if (!esWhatsappValido(whatsapp)) {
+    showCartStatus("El WhatsApp no parece válido — revisalo antes de enviar.", "error");
     return null;
   }
   // Entidad es opcional — no bloquea el envío.
@@ -167,7 +199,7 @@ function openGmailIOS(to, subject, body) {
 
 // Abre la redacción de Gmail con destinatario/asunto/cuerpo ya cargados,
 // SIEMPRE en Gmail específicamente (app en el celular, Gmail web en la
-// compu). La usa el botón "Enviar por Gmail" del presupuesto, y también
+// compu). La usa el botón "Enviar pedido" del presupuesto, y también
 // el botón de Contacto en el celular (ver openEmailContact más abajo).
 function openGmailComposeUrl(to, subject, body) {
   const toParam = encodeURIComponent(to);
@@ -211,16 +243,20 @@ function openEmailContact(to, subject, body) {
   }
 }
 
-async function openGmailCompose() {
+// Manejador del botón "Enviar pedido". Se llama "sendOrder" a propósito,
+// no "openGmailCompose": el envío directo (submitOrderToServer) es el
+// camino principal ahora, abrir Gmail quedó como plan B — ver el bloque
+// de arriba.
+async function sendOrder() {
   const order = prepareOrder();
   if (order === null) return;
 
-  els.sendGmailBtn.disabled = true;
+  els.sendOrderBtn.disabled = true;
   showCartStatus("Enviando tu pedido…", "success");
 
   const enviado = await submitOrderToServer(order);
 
-  els.sendGmailBtn.disabled = false;
+  els.sendOrderBtn.disabled = false;
 
   if (enviado) {
     showCartStatus("¡Listo! Tu pedido fue enviado.", "success");
@@ -287,7 +323,7 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }
 
    Devuelve true si la llamada se pudo hacer (asumimos que el pedido
    llegó bien), o false si el fetch en sí falló (sin internet, el
-   Apps Script inaccesible) — solo en ese caso openGmailCompose() cae al
+   Apps Script inaccesible) — solo en ese caso sendOrder() cae al
    plan B de abrir Gmail.
    ------------------------------------------------------------------------ */
 async function submitOrderToServer(order) {
