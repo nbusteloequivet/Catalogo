@@ -66,7 +66,7 @@ const CONFIG = {
   // presupuesto, el mismo Apps Script guarda el pedido en la planilla Y
   // manda el mail de notificación — ya no lo hace el navegador del
   // cliente (ver cart.js).
-  ORDERS_SHEET_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbzh_Ync4bQOfKprLcN4faM6cn04MMfZoegSFYPH8TVwvLSxJbJ3s5uRphAX-Th2MjPK4Q/exec",
+  ORDERS_SHEET_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbw8JuMEaM_TM05gSieTi-f3Y79FRBawLZs-c4qLSulRhdQQpPYLzFu6IdXHwsuDTRYseA/exec",
 
   // Tiene que ser IDÉNTICO al valor de SITE_TOKEN en el Apps Script
   // (Código.gs). No reemplaza una autenticación real — es un filtro
