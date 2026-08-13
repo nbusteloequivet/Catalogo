@@ -76,7 +76,7 @@ function cacheElements() {
   els.cartStatus = document.getElementById("cart-status");
   els.clearCartBtn = document.getElementById("clear-cart-btn");
 
-  els.sendGmailBtn = document.getElementById("send-gmail-btn");
+  els.sendOrderBtn = document.getElementById("send-order-btn");
 
   els.contactFab = document.getElementById("contact-fab");
   els.contactSection = document.getElementById("company-contact");
