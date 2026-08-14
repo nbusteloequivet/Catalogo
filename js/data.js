@@ -139,9 +139,14 @@ function isIVA(raw) {
 }
 
 // "disponibilidad": si el texto incluye "pedido" se muestra "A pedido";
-// cualquier otro valor (o vacío) se toma como "En stock".
+// cualquier otro texto NO vacío se toma como "En stock". Si la celda está
+// vacía, devolvemos null ("no sabemos") en vez de asumir "En stock" — así
+// un producto recién cargado sin ese dato completado no le muestra al
+// cliente una disponibilidad que en realidad nadie confirmó. Ver
+// availabilityTagHtml en ui.js: con null, no se muestra ningún cartel.
 function normalizeAvailability(raw) {
-  const v = (raw || "").toLowerCase();
+  const v = (raw || "").trim().toLowerCase();
+  if (!v) return null;
   return v.includes("pedido") ? "A pedido" : "En stock";
 }
 
