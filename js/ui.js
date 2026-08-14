@@ -184,7 +184,11 @@ function renderGrid() {
   els.grid.appendChild(fragment);
 }
  
+// Si no se completó la columna "disponibilidad" para este producto
+// (null), no mostramos ningún cartel — es preferible no decir nada a
+// arriesgarnos a mostrar "En stock" de algo que en realidad no se sabe.
 function availabilityTagHtml(p) {
+  if (!p.availability) return "";
   const cls = p.availability === "En stock" ? "in" : "out";
   return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
 }
