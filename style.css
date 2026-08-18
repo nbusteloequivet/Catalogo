@@ -100,6 +100,44 @@ a { color: var(--accent); }
   gap: 14px;
 }
 
+/* ---------- Cartel de "Metodología de uso" (arriba de la página) ----------
+   Mismo patrón visual que el cartel rojo de abajo (caja con borde grueso
+   a la izquierda), pero en violeta: este es un mensaje de bienvenida,
+   no una alerta, así que no usa el rojo reservado para avisos de
+   problemas. Vive en el header, después del logo y antes del buscador. */
+.how-to-use-banner {
+  max-width: 1320px;
+  margin: 0 auto 24px;
+  padding: 0 28px;
+}
+.how-to-use-box {
+  border: 1.5px solid var(--accent);
+  border-left-width: 5px;
+  border-radius: 3px;
+  background: #f7ecff;
+  padding: 18px 22px;
+}
+.how-to-use-box h2 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.how-to-use-box ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.how-to-use-box li { margin-bottom: 2px; }
+.how-to-use-thanks {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 /* ---------- Cartel de aviso (productos en carga) ----------
    Deliberadamente en rojo/de alerta — distinto del banner de estado del
    catálogo (.status-banner, violeta/neutro) para que se note que es un
@@ -609,6 +647,8 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
 .modal-overlay {
   position: fixed;
   inset: 0;
+  height: 100vh;
+  height: 100dvh; /* alto real visible en el celular (100vh no descuenta la barra de direcciones del navegador cuando está mostrándose — por eso la cruz de cerrar quedaba tapada) */
   background: rgba(0, 0, 0, 0.6);
   align-items: center;
   justify-content: center;
@@ -628,6 +668,7 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   max-width: 780px;
   width: 100%;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   position: relative;
 }
@@ -849,6 +890,9 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .header-inner { padding: 24px 18px 14px; }
   .filter-row { padding: 0 18px 16px; }
   .loading-products-banner { margin-top: 20px; padding: 0 18px; }
+  .how-to-use-banner { margin: 0 auto 18px; padding: 0 18px; }
+  .how-to-use-box { padding: 14px 16px; }
+  .how-to-use-box h2 { font-size: 15px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
@@ -870,6 +914,17 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .add-btn {
     width: 100%;
   }
+
+  /* Modal del carrito más compacto en el celular: menos aire alrededor
+     y entre los campos, para que la cruz de cerrar quede siempre bien
+     visible arriba, sin pelearse con la barra de direcciones del
+     navegador (ver el fix de 100dvh más arriba en este archivo). */
+  .modal-overlay { padding: 10px; }
+  .modal-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 13px; }
+  .cart-modal-inner { padding: 20px 16px 18px; gap: 12px; }
+  .cart-modal-inner h2 { font-size: 19px; }
+  .cart-form { gap: 8px; padding-top: 12px; }
+  .cart-send { padding-top: 12px; }
 }
 
 @media (max-width: 380px) {
