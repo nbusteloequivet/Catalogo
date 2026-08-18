@@ -282,9 +282,10 @@ function buildOrderMessage({ nombre, apellido, whatsapp, email, mensaje, items }
   if (items.length > 0) {
     lines.push("Productos:");
     items.forEach(({ product, qty }) => {
+      // Orden pedido: Código - Descripción (nombre del producto) - Cantidad.
       // El código sí va en el mail, aunque nunca se muestre en pantalla.
-      const codePart = product.code ? ` (${product.code})` : "";
-      lines.push(`- ${product.name}${codePart} — Cantidad: ${qty}`);
+      const codePrefix = product.code ? `${product.code} - ` : "";
+      lines.push(`- ${codePrefix}${product.name} - Cantidad: ${qty}`);
     });
   } else {
     // No agregó nada del catálogo (probablemente no encontró lo que
