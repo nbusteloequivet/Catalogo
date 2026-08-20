@@ -200,10 +200,10 @@ a { color: var(--accent); }
   font-family: var(--font-mono);
   font-size: 12px;
   padding: 6px 14px;
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--accent);
   border-radius: 20px;
   background: var(--paper-raised);
-  color: var(--ink-soft);
+  color: var(--accent);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
