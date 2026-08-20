@@ -202,15 +202,15 @@ a { color: var(--accent); }
   padding: 6px 14px;
   border: 1.5px solid var(--accent);
   border-radius: 20px;
-  background: var(--paper-raised);
-  color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all 0.15s ease;
 }
-.filter-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.filter-toggle:hover { opacity: 0.85; }
 /* Violeta cuando el panel está abierto, para que se note cuál está
    desplegado en este momento. */
 .filter-toggle[aria-expanded="true"] {
