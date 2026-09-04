@@ -104,33 +104,62 @@ a { color: var(--accent); }
    Mismo patrón visual que el cartel rojo de abajo (caja con borde grueso
    a la izquierda), pero en violeta: este es un mensaje de bienvenida,
    no una alerta, así que no usa el rojo reservado para avisos de
-   problemas. Vive en el header, después del logo y antes del buscador. */
-.how-to-use-banner {
+   problemas. Vive en el header, después del logo y antes del buscador.
+
+   Es un <details>/<summary> (ver index.html): plegado, se ve solo el
+   título dentro de la caja; un toque/click en el título despliega el
+   resto. Anda igual en computadora, iPhone y Android sin JS propio. */
+.how-to-use-wrap {
   max-width: 1320px;
   margin: 0 auto 24px;
   padding: 0 28px;
 }
-.how-to-use-box {
+.how-to-use-banner {
   border: 1.5px solid var(--accent);
   border-left-width: 5px;
   border-radius: 3px;
   background: #f7ecff;
-  padding: 18px 22px;
+  padding: 14px 22px;
 }
-.how-to-use-box h2 {
+.how-to-use-summary {
   font-family: var(--font-display);
   font-size: 16px;
-  margin: 0 0 10px;
   color: var(--ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* que no parpadee violeta al tocar en el celular */
 }
-.how-to-use-box ol {
+/* Sacar el triangulito nativo — a propósito, se pidió sin ningún
+   indicador visual. Hacen falta las 3 reglas: cada navegador lo dibuja
+   con un mecanismo distinto (Firefox con list-style, Safari/iPhone con
+   ::-webkit-details-marker, Chrome moderno con ::marker). */
+.how-to-use-summary {
+  list-style: none;
+}
+.how-to-use-summary::-webkit-details-marker {
+  display: none;
+}
+.how-to-use-summary::marker {
+  content: "";
+}
+/* Sin la flechita, un usuario de teclado necesita alguna señal de que
+   esto tiene foco — un resalte muy sutil, que solo aparece navegando
+   con teclado (Tab), nunca al tocar o hacer click con mouse. */
+.how-to-use-summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.how-to-use-content {
+  margin-top: 12px;
+}
+.how-to-use-content ol {
   margin: 0 0 12px;
   padding-left: 20px;
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--ink);
 }
-.how-to-use-box li { margin-bottom: 2px; }
+.how-to-use-content li { margin-bottom: 2px; }
 .how-to-use-thanks {
   margin: 0;
   font-size: 13.5px;
@@ -890,9 +919,9 @@ a.contact-card:hover { transform: translateY(-3px); box-shadow: 4px 6px 0 var(--
   .header-inner { padding: 24px 18px 14px; }
   .filter-row { padding: 0 18px 16px; }
   .loading-products-banner { margin-top: 20px; padding: 0 18px; }
-  .how-to-use-banner { margin: 0 auto 18px; padding: 0 18px; }
-  .how-to-use-box { padding: 14px 16px; }
-  .how-to-use-box h2 { font-size: 15px; }
+  .how-to-use-wrap { margin: 0 auto 18px; padding: 0 18px; }
+  .how-to-use-banner { padding: 12px 16px; }
+  .how-to-use-summary { font-size: 15px; }
   #main-content { padding: 20px 18px 110px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .brand-sub { font-size: 16px; }
