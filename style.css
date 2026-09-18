@@ -353,6 +353,7 @@ a { color: var(--accent); }
   justify-content: center;
   overflow: hidden;
   border-bottom: 1.5px solid var(--line);
+  position: relative;
 }
 .card-media img { width: 100%; height: 100%; object-fit: contain; }
 .card-media .no-image {
@@ -442,6 +443,20 @@ a { color: var(--accent); }
 }
 .avail-tag.in { color: var(--accent); border-color: var(--accent); }
 .avail-tag.out { color: var(--ink-soft); border-color: var(--line-strong); }
+
+/* Cartelito flotando arriba a la derecha de la foto en la tarjeta chica.
+   Fondo blanco semitransparente + sombra suave para que se lea bien sin
+   importar el color de fondo de la imagen de atrás. */
+.card-avail-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+.card-avail-badge .avail-tag {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
 
 /* Selector de cantidad + botón "Agregar" de cada tarjeta */
 .card-cart-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
