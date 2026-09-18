@@ -138,16 +138,17 @@ function isIVA(raw) {
   return /^\+?\s*iva$/i.test(raw.trim());
 }
 
-// "disponibilidad": si el texto incluye "pedido" se muestra "A pedido";
-// cualquier otro texto NO vacío se toma como "En stock". Si la celda está
-// vacía, devolvemos null ("no sabemos") en vez de asumir "En stock" — así
-// un producto recién cargado sin ese dato completado no le muestra al
-// cliente una disponibilidad que en realidad nadie confirmó. Ver
-// availabilityTagHtml en ui.js: con null, no se muestra ningún cartel.
+// "disponibilidad": se muestra TAL CUAL lo que haya en la celda, sin
+// interpretarlo ni normalizarlo (si el día de mañana alguien escribe
+// "Quedan 3 unidades" o cualquier otra cosa, eso mismo es lo que va a
+// aparecer en el cartelito — ver availabilityTagHtml en ui.js). Si la
+// celda está vacía, devolvemos null ("no sabemos") en vez de inventar un
+// texto — así un producto recién cargado sin ese dato completado no le
+// muestra al cliente una disponibilidad que en realidad nadie confirmó.
+// Con null, ui.js no muestra ningún cartel.
 function normalizeAvailability(raw) {
-  const v = (raw || "").trim().toLowerCase();
-  if (!v) return null;
-  return v.includes("pedido") ? "A pedido" : "En stock";
+  const v = (raw || "").trim();
+  return v ? v : null;
 }
 
 function extractDriveId(url) {
