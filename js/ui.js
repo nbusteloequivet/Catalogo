@@ -186,10 +186,13 @@ function renderGrid() {
  
 // Si no se completó la columna "disponibilidad" para este producto
 // (null), no mostramos ningún cartel — es preferible no decir nada a
-// arriesgarnos a mostrar "En stock" de algo que en realidad no se sabe.
+// arriesgarnos a mostrar algo que en realidad no se sabe. El texto se
+// muestra TAL CUAL está en la celda (no se reemplaza por nada fijo); el
+// color del cartelito es solo un detalle estético que se basa en si el
+// texto contiene la palabra "pedido" — no cambia lo que se ve escrito.
 function availabilityTagHtml(p) {
   if (!p.availability) return "";
-  const cls = p.availability === "En stock" ? "in" : "out";
+  const cls = p.availability.toLowerCase().includes("pedido") ? "out" : "in";
   return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
 }
  
