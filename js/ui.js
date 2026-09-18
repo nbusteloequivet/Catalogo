@@ -214,6 +214,13 @@ function buildCard(p) {
   media.className = "card-media";
   media.appendChild(buildImageEl(p, false));
   media.addEventListener("click", () => openProductModal(p));
+  // Cartelito de disponibilidad flotando arriba a la derecha de la foto.
+  // Si la celda "disponibilidad" está vacía para este producto,
+  // availabilityTagHtml() devuelve "" y no se agrega nada.
+  const availTag = availabilityTagHtml(p);
+  if (availTag) {
+    media.insertAdjacentHTML("beforeend", `<div class="card-avail-badge">${availTag}</div>`);
+  }
   card.appendChild(media);
  
   const body = document.createElement("div");
@@ -243,7 +250,7 @@ function buildCard(p) {
     ${subcategoryHtml}
     <span class="card-lab">${showLab ? escapeHtml(p.lab) : ""}</span>
     <div class="card-bottom">
-      <div class="card-footer">${availabilityTagHtml(p)}</div>
+      <div class="card-footer"></div>
     </div>
   `;
   body.querySelector(".card-title").addEventListener("click", () => openProductModal(p));
