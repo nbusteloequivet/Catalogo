@@ -6,43 +6,19 @@
 
 <title>Equivet - Veterinaria</title>
 
-<!-- Ícono de la pestaña del navegador. Los archivos van en assets/,
-     junto al logo. favicon.ico es para navegadores viejos; los .png de
-     distintos tamaños son para pestaña, marcadores y accesos directos en
-     el celular (apple-touch-icon es específico para "agregar a inicio"
-     en iPhone). -->
-<!-- MODO PRUEBA: una sola línea, apuntando a la imagen tal cual la
-     subiste, sin ningún procesamiento — para ver cómo la muestra el
-     navegador de verdad antes de armar las versiones optimizadas por
-     tamaño. Cuando estés conforme con cuál imagen usar, avisame y
-     armamos la versión final con los tamaños prolijos (este comentario
-     y la línea de abajo se reemplazan en ese momento). -->
 <link rel="icon" href="assets/favicon-prueba.jpg">
 <meta name="description" content="EquiVet es un laboratorio especializado en reproducción equina en Los Cardales, Buenos Aires. Consultá nuestro catálogo de productos y pedí tu cotización online.">
 <link rel="canonical" href="https://equivet.ar/">
 
-<!-- Si algún recurso llegara a referenciarse por error con "http://" en
-     vez de "https://", el navegador lo sube solo a https antes de
-     pedirlo. No restringe nada de lo que ya funciona (no bloquea
-     cdnjs, Google Fonts, Drive, Maps ni el Apps Script) — es una red de
-     seguridad extra, sin riesgo de romper nada existente. -->
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-<!-- Open Graph: cómo se ve el link al compartirlo en WhatsApp, Instagram, etc. -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_AR">
 <meta property="og:title" content="EquiVet — Laboratorio de Reproducción Equina">
-<meta property="og:description" content="Catálogo de productos y pedidos de cotización de EquiVet, laboratorio de reproducción equina en Los Cardales, Buenos Aires.">
+<meta property="og:description" content="Catálogo de productos y solicitudes de presupuesto de EquiVet, laboratorio de reproducción equina en Los Cardales, Buenos Aires.">
 <meta property="og:url" content="https://equivet.ar/">
 <meta property="og:image" content="https://equivet.ar/assets/logo-equivet.jpg">
 
-<!-- Datos estructurados: le dicen a Google explícitamente qué es la
-     empresa, dónde está y cómo contactarla (nombre, dirección, teléfono,
-     horarios, redes). Esto es lo que puede hacer que aparezcan la
-     dirección/teléfono directo en el resultado de búsqueda. NO garantiza
-     una posición — ver la explicación en el chat. Si cambiás estos datos
-     en js/config.js más adelante, actualizalos también acá para que no
-     queden desincronizados. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -75,41 +51,50 @@
 <body>
 
 <header class="site-header">
+  <button id="account-fab" class="account-corner-btn" type="button" aria-haspopup="dialog">
+    Iniciar sesión
+  </button>
+
   <div class="header-inner">
     <div class="brand">
       <h1 id="lab-name">EquiVet — Laboratorio de Reproducción Equina, Los Cardales</h1>
       <span class="brand-emblem">
         <img id="brand-logo" src="" alt="Logo EquiVet">
       </span>
-      <p class="brand-sub" id="lab-sub">Armá tu pedido y te contactamos para coordinarlo</p>
+      <p class="brand-sub" id="lab-sub">Armá tu presupuesto y te contactamos para coordinarlo</p>
     </div>
   </div>
 
-  <!-- Cartel de bienvenida con los pasos para usar la página — a
-       propósito arriba de todo, antes del buscador, para que sea lo
-       primero que lee el cliente al entrar.
-
-       Usa <details>/<summary> nativo del HTML en vez de un div + JS
-       propio: el navegador ya sabe abrir/cerrar esto solo con un
-       toque/click, tanto en computadora como en iPhone y Android, sin
-       que haya que escribir ni un evento. El triangulito que el
-       navegador dibuja solo al lado de "Metodología..." se saca a
-       propósito en el CSS (.how-to-use-summary) — se pidió sin ningún
-       indicador visual, solo el texto. -->
+  <!-- "Cómo solicitar tu presupuesto" — ya no es un <details> nativo:
+       ahora es un botón (mismo patrón de aria-expanded que los toggles de
+       Categorías/Laboratorios) + un contenedor que se anima con CSS Grid
+       (grid-template-rows 0fr -> 1fr), sin nada de JS calculando alturas
+       a mano. Ver setupHowToUseAnimation en ui.js. -->
   <div class="how-to-use-wrap">
-    <details class="how-to-use-banner">
-      <summary class="how-to-use-summary">Como solicitar tu presupuesto</summary>
-      <div class="how-to-use-content">
-        <ol>
-          <li>Buscá el producto que necesites.</li>
-          <li>Agregá la cantidad que quieras del producto.</li>
-          <li>Una vez que hayas cargado todos los productos que necesitás, dirigite al apartado "Mi presupuesto".</li>
-          <li>Cargá tus datos de contacto para que nos podamos comunicar con vos.</li>
-          <li>Enviá el presupuesto.</li>
-        </ol>
-        <p class="how-to-use-thanks">Nos contactaremos a la brevedad. ¡Muchas gracias!</p>
+    <div class="how-to-use-banner">
+      <button type="button" class="how-to-use-summary" id="how-to-use-toggle" aria-expanded="false" aria-controls="how-to-use-content">
+        Cómo solicitar tu presupuesto<span class="how-to-use-arrow" aria-hidden="true">▾</span>
+      </button>
+      <div class="how-to-use-panel-wrap" id="how-to-use-panel-wrap">
+        <div class="how-to-use-content" id="how-to-use-content">
+          <ol>
+            <li>Buscá el producto que necesites.</li>
+            <li>Agregá la cantidad que quieras del producto.</li>
+            <li>Una vez que hayas cargado todos los productos que necesitás, dirigite al apartado "Mi presupuesto".</li>
+            <li>Cargá tus datos de contacto para que nos podamos comunicar con vos.</li>
+            <li>Enviá el presupuesto.</li>
+          </ol>
+          <p class="how-to-use-thanks">Nos contactaremos a la brevedad. ¡Muchas gracias!</p>
+        </div>
       </div>
-    </details>
+    </div>
+  </div>
+
+  <div class="notice-24h-wrap">
+    <p class="notice-24h">
+      Si no recibís tu presupuesto por mail dentro de las 24&nbsp;hs, escribinos por
+      <a id="notice-24h-whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>.
+    </p>
   </div>
 
   <div class="filter-row">
@@ -119,14 +104,20 @@
         <button id="category-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="category-chips">
           Categorías <span class="filter-toggle-arrow" aria-hidden="true">▾</span>
         </button>
-        <div id="category-chips" class="category-chips chips-panel" hidden></div>
-        <div id="subcategory-chips" class="category-chips chips-panel subcategory-chips" hidden></div>
+        <div id="category-chips-wrap" class="chips-panel-wrap">
+          <div id="category-chips" class="category-chips chips-panel-inner"></div>
+        </div>
+        <div id="subcategory-chips-wrap" class="chips-panel-wrap subcategory-chips">
+          <div id="subcategory-chips" class="category-chips chips-panel-inner"></div>
+        </div>
       </div>
       <div class="filter-group">
         <button id="lab-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="lab-chips">
           Laboratorios <span class="filter-toggle-arrow" aria-hidden="true">▾</span>
         </button>
-        <div id="lab-chips" class="category-chips chips-panel" hidden></div>
+        <div id="lab-chips-wrap" class="chips-panel-wrap">
+          <div id="lab-chips" class="category-chips chips-panel-inner"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -139,17 +130,10 @@
     <p>No hay productos que coincidan con la búsqueda.</p>
   </div>
 
-  <!-- Aviso temporal: se muestra/oculta con CONFIG.SHOW_LOADING_BANNER en
-       js/config.js (nada que tocar acá ni en el CSS). Cuando ya esté
-       cargado el catálogo completo, alcanza con poner ese valor en false.
-       A propósito va DESPUÉS de la grilla (no en el header): así el
-       cliente ve primero los productos y recién al final, antes de
-       Contacto, el aviso de que puede faltar alguno. -->
   <div id="loading-products-banner" class="loading-products-banner" hidden>
     <p>Estamos cargando productos en la página. Si algún producto falta, escribinos el producto y la cantidad que requerís en la casilla "Mensaje adicional" en el apartado "Mi presupuesto". Disculpe las molestias.</p>
   </div>
 
-  <!-- Datos de contacto de la empresa, al final del catálogo -->
   <section id="company-contact" class="company-contact">
     <h2 class="company-contact-title">Contacto</h2>
     <div class="company-contact-grid">
@@ -185,18 +169,18 @@
   </section>
 </main>
 
-<!-- Botones flotantes: Mi presupuesto y Contacto (baja a la sección de contacto) -->
 <div class="fab-stack">
-  <button id="cart-fab" class="fab fab-primary" type="button" aria-haspopup="dialog">
-    Mi presupuesto
-    <span id="cart-count" class="cart-count" hidden>0</span>
+  <button id="historial-fab" class="fab fab-secondary" type="button" aria-haspopup="dialog">
+    Mi historial
+  </button>
+  <button id="cart-fab" class="fab fab-secondary" type="button" aria-haspopup="dialog">
+    Nuevo presupuesto
   </button>
   <button id="contact-fab" class="fab fab-secondary" type="button">
     Contacto
   </button>
 </div>
 
-<!-- Modal de detalle de un producto -->
 <div id="product-modal" class="modal-overlay" hidden>
   <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <button class="modal-close" data-close-modal="product-modal" aria-label="Cerrar">✕</button>
@@ -204,7 +188,6 @@
   </div>
 </div>
 
-<!-- Modal del carrito / pedido -->
 <div id="cart-modal" class="modal-overlay" hidden>
   <div class="modal-content cart-modal-content" role="dialog" aria-modal="true" aria-labelledby="cart-title">
     <button class="modal-close" data-close-modal="cart-modal" aria-label="Cerrar">✕</button>
@@ -212,16 +195,28 @@
       <h2 id="cart-title">Mi presupuesto</h2>
 
       <div id="cart-items" class="cart-items"></div>
-      <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos del catálogo. Si no encontrás lo que buscás, contanos qué necesitás en "Mensaje adicional" y enviá el pedido igual.</p>
+      <p id="cart-empty" class="cart-empty" hidden>Todavía no agregaste productos del catálogo. Si no encontrás lo que buscás, contanos qué necesitás en "Mensaje adicional" y enviá la solicitud igual.</p>
+      <button id="add-product-btn" class="cart-add-product-btn" type="button">+ Agregar producto</button>
 
       <div class="cart-form">
         <h3>Tus datos de contacto</h3>
-        <label>Nombre y Apellido*
+        <label>Nombre*
           <input id="cart-nombre" type="text" autocomplete="given-name">
         </label>
-        <label>Entidad (si corresponde)
+        <label>Apellido*
           <input id="cart-apellido" type="text" autocomplete="family-name">
         </label>
+        <label>Entidad (si corresponde)
+          <input id="cart-entidad" type="text" autocomplete="organization">
+        </label>
+        <div class="factura-field">
+          <span class="factura-field-label">¿Necesitás factura A?</span>
+          <div class="factura-toggle">
+            <button type="button" id="factura-si-btn" class="factura-btn">Sí</button>
+            <button type="button" id="factura-no-btn" class="factura-btn">No</button>
+          </div>
+          <input type="hidden" id="cart-factura" class="factura-hidden-input" value="">
+        </div>
         <label>WhatsApp*
           <input id="cart-whatsapp" type="tel" placeholder="+54 9 11 1234-5678" autocomplete="tel">
         </label>
@@ -232,14 +227,6 @@
           <textarea id="cart-mensaje" rows="3" placeholder="si algún producto no lo encontraste en el catalogo, por favor detallanos en tu mensaje y te ponemos el producto o alternativa"></textarea>
         </label>
 
-        <!-- Campo trampa anti-spam: invisible para un cliente real (ver
-             .honeypot-field en style.css). Algunos bots que completan
-             formularios automáticamente lo llenan igual — si llega
-             completo, el pedido se descarta en el Apps Script sin
-             procesarse. No lleva type="hidden" a propósito: los bots más
-             básicos lo saltean si lo detectan así. tabindex="-1" y
-             aria-hidden lo sacan de la navegación por teclado y de
-             lectores de pantalla, para no molestar a nadie real. -->
         <label class="honeypot-field" aria-hidden="true">
           Sitio web
           <input id="cart-honeypot" type="text" tabindex="-1" autocomplete="off">
@@ -249,11 +236,113 @@
       <div id="cart-status" class="cart-status" hidden></div>
 
       <div class="cart-send">
-        <button id="send-order-btn" class="btn-provider" type="button">Enviar pedido</button>
+        <p class="cart-send-note">Esto envía una <strong>solicitud de presupuesto</strong>, no una compra ni un pedido confirmado. No se realiza ningún cobro: te contactamos con el presupuesto y la disponibilidad de los productos a la brevedad.</p>
+        <button id="send-order-btn" class="btn-provider" type="button">Solicitar presupuesto</button>
       </div>
 
       <div class="cart-actions">
-        <button id="clear-cart-btn" class="btn-secondary" type="button">Vaciar pedido</button>
+        <button id="cancel-edit-btn" class="btn-secondary cancel-edit-btn" type="button" hidden>No editar presupuesto</button>
+        <button id="clear-cart-btn" class="btn-secondary" type="button">Vaciar presupuesto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="account-modal" class="modal-overlay" hidden>
+  <div class="modal-content account-modal-content" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <button class="modal-close" data-close-modal="account-modal" aria-label="Cerrar">✕</button>
+    <div class="account-modal-inner">
+      <h2 id="account-title">Iniciar sesión</h2>
+
+      <div id="account-view-login">
+        <div class="account-fields">
+          <label>Email
+            <input id="login-email" type="email" autocomplete="email">
+          </label>
+          <label>Contraseña
+            <input id="login-password" type="text" autocomplete="current-password">
+          </label>
+        </div>
+        <div id="login-status" class="cart-status" hidden></div>
+        <button id="login-submit-btn" class="btn-provider" type="button">Iniciar sesión</button>
+        <p class="account-switch">¿No tenés cuenta? <button id="show-registro-btn" class="link-btn" type="button">Creá una</button></p>
+        <p class="account-switch"><button id="show-forgot-btn" class="link-btn" type="button">¿Olvidaste tu contraseña?</button></p>
+      </div>
+
+      <div id="account-view-registro" hidden>
+        <div class="account-fields">
+          <label>Nombre
+            <input id="registro-nombre" type="text" autocomplete="given-name">
+          </label>
+          <label>Apellido*
+            <input id="registro-apellido" type="text" autocomplete="family-name">
+          </label>
+          <label>Email
+            <input id="registro-email" type="email" autocomplete="email">
+          </label>
+          <label>Contraseña
+            <input id="registro-password" type="text" autocomplete="new-password">
+          </label>
+        </div>
+        <div id="registro-status" class="cart-status" hidden></div>
+        <button id="registro-submit-btn" class="btn-provider" type="button">Crear cuenta</button>
+        <p class="account-switch">¿Ya tenés cuenta? <button id="show-login-btn" class="link-btn" type="button">Iniciá sesión</button></p>
+      </div>
+
+      <div id="account-view-forgot" hidden>
+        <div class="account-fields">
+          <label>Email
+            <input id="forgot-email" type="email" autocomplete="email">
+          </label>
+        </div>
+        <div id="forgot-status" class="cart-status" hidden></div>
+        <button id="forgot-submit-btn" class="btn-provider" type="button">Enviar enlace de recuperación</button>
+        <p class="account-switch">¿Te acordaste? <button id="show-login-from-forgot-btn" class="link-btn" type="button">Iniciá sesión</button></p>
+      </div>
+
+      <div id="account-view-reset" hidden>
+        <div class="account-fields">
+          <label>Nueva contraseña
+            <input id="reset-password" type="text" autocomplete="new-password">
+          </label>
+        </div>
+        <div id="reset-status" class="cart-status" hidden></div>
+        <button id="reset-submit-btn" class="btn-provider" type="button">Guardar nueva contraseña</button>
+      </div>
+
+      <div id="account-view-verificar" hidden>
+        <p>Te mandamos un mail para activar tu cuenta. Una vez que lo confirmes, ya podés iniciar sesión.</p>
+      </div>
+
+      <div id="account-view-logged" hidden>
+        <p>Hola, <span id="account-greeting-name"></span>.</p>
+        <button id="account-logout-btn" class="btn-logout" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="historial-modal" class="modal-overlay" hidden>
+  <div class="modal-content cart-modal-content" role="dialog" aria-modal="true" aria-labelledby="historial-title">
+    <button class="modal-close" data-close-modal="historial-modal" aria-label="Cerrar">✕</button>
+    <div class="cart-modal-inner">
+      <h2 id="historial-title">Mi historial</h2>
+
+      <div id="historial-view-guest" class="historial-guest-prompt" hidden>
+        <p>Iniciá sesión o creá una cuenta para ver el historial completo de las solicitudes de presupuesto que hiciste.</p>
+        <button id="historial-guest-login-btn" class="btn-provider" type="button">Iniciar sesión / Crear cuenta</button>
+      </div>
+
+      <div id="historial-view-list">
+        <div id="historial-list" class="historial-list"></div>
+        <p id="historial-empty" class="cart-empty" hidden>Todavía no hiciste ninguna solicitud de presupuesto.</p>
+      </div>
+
+      <div id="historial-view-detail" hidden>
+        <button id="historial-back-btn" class="link-btn" type="button">← Volver a mis solicitudes</button>
+        <div id="historial-detail-body" class="historial-detail-body"></div>
+        <div id="historial-edit-status" class="cart-status" hidden></div>
+        <button id="historial-edit-btn" class="btn-provider" type="button">Editar solicitud</button>
       </div>
     </div>
   </div>
@@ -264,6 +353,8 @@
 <script src="js/state.js"></script>
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/account.js"></script>
+<script src="js/historial.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>

@@ -1,47 +1,26 @@
 /* =========================================================================
    STATE.JS — Estado compartido en memoria de toda la aplicación.
-   Es deliberadamente simple hoy (variables sueltas). El día que la página
-   necesite hablar con una base de datos o una API propia, este es el
-   archivo que se reemplazaría por un manejo de estado más robusto (o por
-   datos que vengan directamente de la respuesta de esa API), sin tener
-   que tocar ui.js ni cart.js.
    ========================================================================= */
 
-// Todos los productos ya normalizados, tal como vienen de data.js
 let allProducts = [];
 
-// Filtros activos de la grilla
-let activeCategory = null;
-let activeLab = null;
+let activeCategories = new Set();
+let activeLabs = new Set();
 let activeSubcategory = null;
 let searchTerm = "";
 
-// Color asignado a cada categoría (se arma en ui.js, buildCategoryChips)
 let categoryColorMap = {};
 
-// Nombres de producto que se repiten en más de un producto del catálogo
-// (mismo nombre, distinto laboratorio: son 2 tarjetas a propósito). Se
-// recalcula en data.js, computeDuplicateNames(), cada vez que se carga el
-// catálogo. ui.js lo usa para mostrar el laboratorio en la tarjeta chica
-// SOLO en estos casos puntuales, donde es lo único que distingue a un
-// producto del otro sin entrar al detalle.
 let duplicateProductNames = new Set();
 
-// El carrito/pedido: { claveDelProducto: { product, qty } }
 let cart = {};
 
-// Referencias a los "En tu pedido: N" de cada tarjeta, para actualizarlos
-// sin reconstruir toda la grilla cada vez que cambia el carrito.
 let cartIndicatorEls = {};
 
-// Referencias a los botones "Agregar/Agregado/Modificar/Modificado" de
-// cada tarjeta, para poder devolverlos a su estado inicial cuando el
-// producto se saca del carrito desde otro lado (el ✕ del carrito, o
-// "Vaciar pedido") sin reconstruir toda la grilla. Mismo patrón que
-// cartIndicatorEls de arriba.
-let addButtonEls = {};
+let session = null;
 
-// Cache de elementos del DOM (se completa una sola vez en main.js)
+let editingOrderId = null;
+
 const els = {};
 
 function cacheElements() {
@@ -49,9 +28,14 @@ function cacheElements() {
   els.statusBanner = document.getElementById("status-banner");
   els.emptyState = document.getElementById("empty-state");
   els.searchInput = document.getElementById("search-input");
+
+  els.categoryChipsWrap = document.getElementById("category-chips-wrap");
   els.categoryChips = document.getElementById("category-chips");
+  els.subcategoryChipsWrap = document.getElementById("subcategory-chips-wrap");
   els.subcategoryChips = document.getElementById("subcategory-chips");
+  els.labChipsWrap = document.getElementById("lab-chips-wrap");
   els.labChips = document.getElementById("lab-chips");
+
   els.categoryToggle = document.getElementById("category-toggle");
   els.labToggle = document.getElementById("lab-toggle");
   els.labName = document.getElementById("lab-name");
@@ -59,16 +43,26 @@ function cacheElements() {
   els.logoImg = document.getElementById("brand-logo");
   els.loadingBanner = document.getElementById("loading-products-banner");
 
+  els.howToUseToggle = document.getElementById("how-to-use-toggle");
+  els.howToUsePanelWrap = document.getElementById("how-to-use-panel-wrap");
+  els.notice24hWhatsapp = document.getElementById("notice-24h-whatsapp");
+
   els.productModal = document.getElementById("product-modal");
   els.modalBody = document.getElementById("modal-body");
 
   els.cartFab = document.getElementById("cart-fab");
-  els.cartCount = document.getElementById("cart-count");
   els.cartModal = document.getElementById("cart-modal");
+  els.cartTitle = document.getElementById("cart-title");
   els.cartItemsEl = document.getElementById("cart-items");
   els.cartEmptyEl = document.getElementById("cart-empty");
+  els.addProductBtn = document.getElementById("add-product-btn");
   els.cartNombre = document.getElementById("cart-nombre");
   els.cartApellido = document.getElementById("cart-apellido");
+  els.cartEntidad = document.getElementById("cart-entidad");
+  els.cartFactura = document.getElementById("cart-factura");
+  els.facturaSiBtn = document.getElementById("factura-si-btn");
+  els.facturaNoBtn = document.getElementById("factura-no-btn");
+  els.facturaToggle = document.querySelector(".factura-toggle");
   els.cartWhatsapp = document.getElementById("cart-whatsapp");
   els.cartEmail = document.getElementById("cart-email");
   els.cartMensaje = document.getElementById("cart-mensaje");
@@ -77,6 +71,7 @@ function cacheElements() {
   els.clearCartBtn = document.getElementById("clear-cart-btn");
 
   els.sendOrderBtn = document.getElementById("send-order-btn");
+  els.cancelEditBtn = document.getElementById("cancel-edit-btn");
 
   els.contactFab = document.getElementById("contact-fab");
   els.contactSection = document.getElementById("company-contact");
@@ -91,4 +86,55 @@ function cacheElements() {
   els.contactAddressValue = document.getElementById("contact-address-value");
   els.contactMapLink = document.getElementById("contact-map-link");
   els.contactMapIframe = document.getElementById("contact-map-iframe");
+
+  els.accountFab = document.getElementById("account-fab");
+  els.accountModal = document.getElementById("account-modal");
+  els.accountTitle = document.getElementById("account-title");
+
+  els.accountViewLogin = document.getElementById("account-view-login");
+  els.accountViewRegistro = document.getElementById("account-view-registro");
+  els.accountViewForgot = document.getElementById("account-view-forgot");
+  els.accountViewReset = document.getElementById("account-view-reset");
+  els.accountViewVerificar = document.getElementById("account-view-verificar");
+  els.accountViewLogged = document.getElementById("account-view-logged");
+
+  els.loginEmail = document.getElementById("login-email");
+  els.loginPassword = document.getElementById("login-password");
+  els.loginStatus = document.getElementById("login-status");
+  els.loginSubmitBtn = document.getElementById("login-submit-btn");
+  els.showRegistroBtn = document.getElementById("show-registro-btn");
+  els.showForgotBtn = document.getElementById("show-forgot-btn");
+
+  els.registroNombre = document.getElementById("registro-nombre");
+  els.registroApellido = document.getElementById("registro-apellido");
+  els.registroEmail = document.getElementById("registro-email");
+  els.registroPassword = document.getElementById("registro-password");
+  els.registroStatus = document.getElementById("registro-status");
+  els.registroSubmitBtn = document.getElementById("registro-submit-btn");
+  els.showLoginBtn = document.getElementById("show-login-btn");
+
+  els.forgotEmail = document.getElementById("forgot-email");
+  els.forgotStatus = document.getElementById("forgot-status");
+  els.forgotSubmitBtn = document.getElementById("forgot-submit-btn");
+  els.showLoginFromForgotBtn = document.getElementById("show-login-from-forgot-btn");
+
+  els.resetPassword = document.getElementById("reset-password");
+  els.resetStatus = document.getElementById("reset-status");
+  els.resetSubmitBtn = document.getElementById("reset-submit-btn");
+
+  els.accountGreetingName = document.getElementById("account-greeting-name");
+  els.accountLogoutBtn = document.getElementById("account-logout-btn");
+
+  els.historialFab = document.getElementById("historial-fab");
+  els.historialModal = document.getElementById("historial-modal");
+  els.historialList = document.getElementById("historial-list");
+  els.historialEmpty = document.getElementById("historial-empty");
+  els.historialViewList = document.getElementById("historial-view-list");
+  els.historialViewDetail = document.getElementById("historial-view-detail");
+  els.historialViewGuest = document.getElementById("historial-view-guest");
+  els.historialGuestLoginBtn = document.getElementById("historial-guest-login-btn");
+  els.historialBackBtn = document.getElementById("historial-back-btn");
+  els.historialDetailBody = document.getElementById("historial-detail-body");
+  els.historialEditBtn = document.getElementById("historial-edit-btn");
+  els.historialEditStatus = document.getElementById("historial-edit-status");
 }
