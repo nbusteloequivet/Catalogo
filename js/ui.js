@@ -166,9 +166,16 @@ function renderGrid() {
   els.grid.appendChild(fragment);
 }
 
+// El texto del cartel es siempre el literal de la planilla (ver
+// normalizeAvailability en data.js) — lo único que decidimos acá es el
+// color: "out" (gris) para cualquier variante de sin stock/agotado/a
+// pedido, "in" (color de acento) para cualquier otro texto, que se asume
+// una disponibilidad en sentido positivo ("En stock", "Disponible", etc.).
 function availabilityTagHtml(p) {
   if (!p.availability) return "";
-  const cls = p.availability === "En stock" ? "in" : "out";
+  const texto = p.availability.toLowerCase();
+  const esNegativoOAPedido = /sin\s*stock|agotad|no\s*disponible|pedido/.test(texto);
+  const cls = esNegativoOAPedido ? "out" : "in";
   return `<span class="avail-tag ${cls}">${escapeHtml(p.availability)}</span>`;
 }
 
