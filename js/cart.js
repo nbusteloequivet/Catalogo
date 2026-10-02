@@ -179,6 +179,13 @@ function sendOrder() {
   if (order === null) return;
 
   const wasEditing = Boolean(editingOrderId);
+  // Esto se captura ACÁ, antes de clearCart() (que resetea editingOrderId
+  // y, si hubiera, la sesión no cambia pero el pedido sí deja de estar "en
+  // edición") — si submitOrderToServer leyera editingOrderId de nuevo
+  // después del clearCart(), ya lo iba a encontrar en null y el servidor
+  // nunca se enteraba de que esto era una edición: terminaba creando un
+  // pedido nuevo duplicado en vez de actualizar el que ya existía.
+  const editContext = wasEditing && session ? { editOrderId: editingOrderId, sessionToken: session.token } : null;
 
   // Optimista: se muestra el resultado de éxito y se vacía el carrito DE
   // UNA, sin esperar la respuesta del servidor — es justamente lo que
@@ -198,7 +205,7 @@ function sendOrder() {
   );
   clearCart();
 
-  submitOrderToServer(order).then((enviado) => {
+  submitOrderToServer(order, editContext).then((enviado) => {
     if (enviado) {
       // El historial del cliente ya cambió — se refresca la caché local
       // en segundo plano para que "Mi historial" ya esté al día la
@@ -246,7 +253,7 @@ function buildOrderMessage({ nombre, apellido, entidad, necesitaFactura, whatsap
   return lines.join("\n");
 }
 
-async function submitOrderToServer(order) {
+async function submitOrderToServer(order, editContext) {
   if (!CONFIG.ORDERS_SHEET_WEBAPP_URL || CONFIG.ORDERS_SHEET_WEBAPP_URL.includes("PEGAR_AQUI")) {
     console.warn("CONFIG.ORDERS_SHEET_WEBAPP_URL no está configurada: no se pudo enviar el pedido.");
     return false;
@@ -273,9 +280,9 @@ async function submitOrderToServer(order) {
     })),
   };
 
-  if (editingOrderId && session) {
-    payload.editOrderId = editingOrderId;
-    payload.sessionToken = session.token;
+  if (editContext) {
+    payload.editOrderId = editContext.editOrderId;
+    payload.sessionToken = editContext.sessionToken;
   }
 
   try {

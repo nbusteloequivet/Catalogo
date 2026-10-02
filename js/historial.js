@@ -47,8 +47,18 @@ function borrarHistorialCache() {
 }
 
 async function fetchMisPedidosYCachear() {
+  // El token se guarda ACÁ, antes del await — si en vez de esto
+  // guardarHistorialCache leyera session.token recién al terminar el
+  // pedido, y justo en el medio alguien cerrara sesión y otra persona
+  // iniciara sesión en el mismo navegador (un mostrador compartido, por
+  // ejemplo), el historial del primer cliente quedaba guardado con el
+  // token del segundo — y ese segundo cliente terminaba viendo los
+  // pedidos, el WhatsApp y el email del primero.
+  const tokenAlPedir = session ? session.token : null;
   const data = await fetchMisPedidos();
-  if (data.ok) guardarHistorialCache(data.pedidos);
+  if (data.ok && session && session.token === tokenAlPedir) {
+    guardarHistorialCache(data.pedidos);
+  }
   return data;
 }
 
