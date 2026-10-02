@@ -129,6 +129,24 @@ function logout() {
   session = null;
   clearSessionFromStorage();
   borrarHistorialCache();
+  // Se limpia el carrito (incluido editingOrderId, si había una edición a
+  // medio hacer) y los campos de contacto del formulario — si no se hace
+  // esto acá, en una computadora compartida (mostrador, tablet de
+  // recepción) el siguiente cliente que inicia sesión se encuentra el
+  // carrito y los datos de contacto de la persona anterior todavía
+  // cargados. Peor: si la persona anterior había quedado "editando" un
+  // pedido (editingOrderId sin resetear) y el siguiente cliente llega a
+  // enviar esa pantalla sin darse cuenta, sendOrder() arma igual un
+  // editContext (ahora con la sesión del segundo cliente) y lo manda al
+  // servidor — que lo rechaza por no pertenecerle ("pedido_no_pertenece"),
+  // pero como el envío usa fetch con mode:"no-cors", el navegador nunca se
+  // entera de ese rechazo: le muestra al segundo cliente "enviado con
+  // éxito" aunque en realidad no se guardó nada de lo que acababa de
+  // cargar.
+  clearCart();
+  [els.cartNombre, els.cartApellido, els.cartWhatsapp, els.cartEmail, els.cartEntidad, els.cartMensaje].forEach((input) => {
+    input.value = "";
+  });
   showAccountView("login");
   updateAccountButton();
 }
