@@ -228,7 +228,7 @@ async function submitForgotPassword() {
   try {
     await accountApiCall({ action: "solicitarRecuperacion", email });
     els.forgotEmail.value = "";
-    showAccountStatus(els.forgotStatus, "Si ese email está registrado, te llegó un enlace para restablecer tu contraseña.", "success");
+    showAccountStatus(els.forgotStatus, "Si ese email está registrado, te llegó un enlace para restablecer tu contraseña. Si no lo ves, revisá la carpeta de spam.", "success");
   } catch (err) {
     console.error("Error al pedir recuperación de contraseña:", err);
     showAccountStatus(els.forgotStatus, "No pudimos conectar — probá de nuevo en un momento.", "error");
