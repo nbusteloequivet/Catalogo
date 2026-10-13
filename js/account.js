@@ -112,6 +112,10 @@ async function submitRegistro() {
       return;
     }
 
+    // Se muestra a qué dirección se mandó el mail — si el cliente se
+    // equivocó al escribirla (ej. "@gamil.com"), lo ve acá mismo en vez de
+    // quedarse esperando un mail que nunca le va a llegar.
+    els.verificarEmail.textContent = email;
     els.registroNombre.value = "";
     els.registroApellido.value = "";
     els.registroEmail.value = "";
@@ -292,7 +296,8 @@ function mensajeErrorCuenta(codigo) {
     password_muy_corta: "La contraseña tiene que tener al menos 8 caracteres.",
     email_ya_registrado: "Ya existe una cuenta verificada con ese email.",
     credenciales_invalidas: "Email o contraseña incorrectos.",
-    cuenta_no_verificada: "Todavía no verificaste tu cuenta — revisá tu mail.",
+    cuenta_no_verificada: "Todavía no verificaste tu cuenta — revisá tu mail (también la carpeta de spam). Si no te llegó, volvé a registrarte con el mismo email y te lo mandamos de nuevo.",
+    mail_no_enviado: "No pudimos enviarte el mail de activación en este momento — probá de nuevo más tarde o escribinos a info@equivet.com.ar.",
   };
   return mensajes[codigo] || "Ocurrió un error — probá de nuevo.";
 }

@@ -96,6 +96,7 @@ function cacheElements() {
   els.accountViewForgot = document.getElementById("account-view-forgot");
   els.accountViewReset = document.getElementById("account-view-reset");
   els.accountViewVerificar = document.getElementById("account-view-verificar");
+  els.verificarEmail = document.getElementById("verificar-email");
   els.accountViewLogged = document.getElementById("account-view-logged");
 
   els.loginEmail = document.getElementById("login-email");
